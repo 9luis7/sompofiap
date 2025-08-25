@@ -3,48 +3,48 @@
 ## 📋 Pré-requisitos
 
 ### Software Necessário
-- **Docker Desktop** (versão 20.10+)
-- **Docker Compose** (versão 2.0+)
-- **Git** (para clonar o repositório)
+- **Python 3.8+** - [Download Python](https://www.python.org/downloads/)
+- **Node.js 16+** - [Download Node.js](https://nodejs.org/)
+- **npm** (vem com Node.js)
 - **4GB RAM** disponível
 - **2GB espaço** em disco
 
 ### Verificação de Instalação
 ```bash
-# Verificar Docker
-docker --version
+# Verificar Python
+python --version
 
-# Verificar Docker Compose
-docker-compose --version
+# Verificar Node.js
+node --version
 
-# Verificar Git
-git --version
+# Verificar npm
+npm --version
 ```
 
 ## 🎯 Execução Rápida (Recomendado)
 
 ### 1. Clone o Repositório
 ```bash
-git clone <repository-url>
+git clone https://github.com/9luis7/sompofiap.git
 cd sompo
 ```
 
 ### 2. Execute o Script de Inicialização
 ```bash
-# No Windows (PowerShell)
-.\start.sh
+# No Windows
+start_local.bat
 
-# No Linux/Mac
-chmod +x start.sh
-./start.sh
+# No Linux/Mac (se disponível)
+chmod +x start_local.sh
+./start_local.sh
 ```
 
 ### 3. Aguarde a Inicialização
 O script irá:
 - ✅ Verificar dependências
-- ✅ Criar diretórios necessários
-- ✅ Construir containers Docker
-- ✅ Iniciar todos os serviços
+- ✅ Instalar pacotes Python e Node.js
+- ✅ Iniciar backend (porta 8000)
+- ✅ Iniciar frontend (porta 3000)
 - ✅ Exibir URLs de acesso
 
 ## 🔧 Execução Manual
@@ -56,26 +56,30 @@ mkdir -p ml_models
 mkdir -p backend/data
 ```
 
-### 2. Construir e Iniciar
+### 2. Instalar Dependências do Backend
 ```bash
-# Construir containers
-docker-compose build
-
-# Iniciar serviços
-docker-compose up -d
-
-# Verificar status
-docker-compose ps
+cd backend
+pip install -r requirements.txt
+cd ..
 ```
 
-### 3. Verificar Logs
+### 3. Instalar Dependências do Frontend
 ```bash
-# Ver logs de todos os serviços
-docker-compose logs -f
+cd frontend
+npm install
+cd ..
+```
 
-# Ver logs específicos
-docker-compose logs -f backend
-docker-compose logs -f frontend
+### 4. Iniciar Backend
+```bash
+cd backend
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 5. Iniciar Frontend (em outro terminal)
+```bash
+cd frontend
+npm start
 ```
 
 ## 🌐 Acessos do Sistema
@@ -86,226 +90,191 @@ docker-compose logs -f frontend
 - **Documentação API**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
-### Credenciais (se necessário)
-- **Usuário**: admin
-- **Senha**: admin123
-
 ## 📊 Testando o Sistema
 
-### 1. Verificar Dashboard
+### 1. Verificar Backend
+```bash
+# Health Check
+curl http://localhost:8000/health
+
+# Dados do Dashboard
+curl http://localhost:8000/api/dashboard/overview
+
+# Alertas de Risco
+curl http://localhost:8000/api/dashboard/risk-alerts
+```
+
+### 2. Verificar Frontend
 1. Acesse http://localhost:3000
 2. Verifique se as métricas estão carregando
 3. Navegue pelos diferentes módulos
 
-### 2. Testar APIs
-1. Acesse http://localhost:8000/docs
-2. Teste os endpoints disponíveis
-3. Verifique as respostas
-
-### 3. Gerar Dados de Demonstração
+### 3. Testar APIs
 ```bash
-# Via API
-curl -X GET "http://localhost:8000/api/data/generate-demo"
-
-# Ou acesse no navegador
-http://localhost:8000/api/data/generate-demo
-```
-
-## 🔍 Comandos Úteis
-
-### Gerenciamento de Containers
-```bash
-# Parar todos os serviços
-docker-compose down
-
-# Reiniciar serviços
-docker-compose restart
-
-# Reconstruir containers
-docker-compose up --build -d
-
-# Ver logs em tempo real
-docker-compose logs -f
-
-# Entrar em um container
-docker-compose exec backend bash
-docker-compose exec frontend sh
-```
-
-### Limpeza e Reset
-```bash
-# Parar e remover containers
-docker-compose down
-
-# Remover volumes (cuidado - apaga dados)
-docker-compose down -v
-
-# Limpar imagens não utilizadas
-docker system prune -a
-
-# Reset completo
-docker-compose down -v
-docker system prune -a -f
-docker-compose up --build -d
-```
-
-## 🐛 Solução de Problemas
-
-### Problema: Porta já em uso
-```bash
-# Verificar processos usando as portas
-netstat -ano | findstr :3000  # Windows
-lsof -i :3000                 # Linux/Mac
-
-# Parar processo específico
-taskkill /PID <PID> /F        # Windows
-kill -9 <PID>                 # Linux/Mac
-```
-
-### Problema: Containers não iniciam
-```bash
-# Verificar logs detalhados
-docker-compose logs backend
-docker-compose logs frontend
-
-# Verificar recursos do sistema
-docker stats
-
-# Reiniciar Docker Desktop (Windows/Mac)
-```
-
-### Problema: API não responde
-```bash
-# Verificar se o backend está rodando
-curl http://localhost:8000/health
-
-# Verificar logs do backend
-docker-compose logs -f backend
-
-# Reiniciar apenas o backend
-docker-compose restart backend
-```
-
-### Problema: Frontend não carrega
-```bash
-# Verificar se o frontend está rodando
-curl http://localhost:3000
-
-# Verificar logs do frontend
-docker-compose logs -f frontend
-
-# Reiniciar apenas o frontend
-docker-compose restart frontend
-```
-
-## 📱 Testando Funcionalidades
-
-### 1. Predição de Risco
-```bash
-curl -X POST "http://localhost:8000/api/prediction/risk-assessment" \
+# Predição de Risco
+curl -X POST http://localhost:8000/api/prediction/risk-assessment \
   -H "Content-Type: application/json" \
-  -d '{
-    "driver_id": "DRIVER001",
-    "vehicle_id": "VEHICLE001",
-    "origin": "São Paulo",
-    "destination": "Rio de Janeiro",
-    "date": "2024-01-15T08:00:00Z"
-  }'
-```
+  -d '{"driver_id": "DRIVER001", "vehicle_id": "VEHICLE001", "origin": "São Paulo", "destination": "Rio de Janeiro", "date": "2025-08-25"}'
 
-### 2. Otimização de Rota
-```bash
-curl -X POST "http://localhost:8000/api/optimization/route" \
+# Otimização de Rota
+curl -X POST http://localhost:8000/api/optimization/route \
   -H "Content-Type: application/json" \
-  -d '{
-    "origin": "São Paulo",
-    "destination": "Rio de Janeiro",
-    "preferences": {
-      "risk_aversion": 0.7,
-      "time_importance": 0.2,
-      "distance_importance": 0.1
-    }
-  }'
+  -d '{"origin": "São Paulo", "destination": "Rio de Janeiro", "preferences": {"risk_aversion": 0.8, "time_priority": 0.6, "distance_priority": 0.4}}'
+
+# Score do Motorista
+curl http://localhost:8000/api/scoring/driver/DRIVER001
 ```
 
-### 3. Dashboard Overview
+## 🔧 Solução de Problemas
+
+### Erro: "Python não encontrado"
 ```bash
-curl -X GET "http://localhost:8000/api/dashboard/overview"
+# Windows
+# Instale Python do site oficial e adicione ao PATH
+
+# Linux/Mac
+sudo apt-get install python3 python3-pip  # Ubuntu/Debian
+brew install python3  # macOS
 ```
 
-## 🔧 Configurações Avançadas
-
-### Variáveis de Ambiente
-Crie um arquivo `.env` na raiz do projeto:
-```env
-# Backend
-PYTHONPATH=/app
-DATABASE_URL=postgresql://sompo_user:sompo_password@postgres:5432/sompo_ia
-
-# Frontend
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_ENVIRONMENT=development
-
-# Database
-POSTGRES_DB=sompo_ia
-POSTGRES_USER=sompo_user
-POSTGRES_PASSWORD=sompo_password
-```
-
-### Modificar Portas
-Edite o `docker-compose.yml`:
-```yaml
-services:
-  backend:
-    ports:
-      - "8001:8000"  # Mudou de 8000 para 8001
-  
-  frontend:
-    ports:
-      - "3001:3000"  # Mudou de 3000 para 3001
-```
-
-## 📊 Monitoramento
-
-### Verificar Status dos Serviços
+### Erro: "Node.js não encontrado"
 ```bash
-# Status geral
-docker-compose ps
+# Windows
+# Instale Node.js do site oficial
 
-# Uso de recursos
-docker stats
-
-# Logs em tempo real
-docker-compose logs -f
+# Linux/Mac
+curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs  # Ubuntu/Debian
+brew install node  # macOS
 ```
 
-### Métricas de Performance
-- **Backend**: http://localhost:8000/health
-- **Frontend**: Verificar console do navegador
-- **Database**: Verificar logs do PostgreSQL
+### Erro: "Porta já em uso"
+```bash
+# Windows
+netstat -ano | findstr :8000
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
 
-## 🎯 Próximos Passos
+# Linux/Mac
+lsof -i :8000
+lsof -i :3000
+kill -9 <PID>
+```
 
-### Após Execução Bem-sucedida
-1. ✅ **Explorar Dashboard**: Navegue por todas as funcionalidades
-2. ✅ **Testar APIs**: Use a documentação Swagger
-3. ✅ **Analisar Dados**: Verifique as métricas e gráficos
-4. ✅ **Fazer Demonstração**: Apresente o sistema para stakeholders
+### Erro: "Módulo não encontrado"
+```bash
+# Reinstalar dependências do backend
+cd backend
+pip install -r requirements.txt --force-reinstall
 
-### Para Produção
-1. 🔄 **Configurar SSL**: Certificados HTTPS
-2. 🔄 **Backup Database**: Configurar backups automáticos
-3. 🔄 **Monitoramento**: Implementar alertas
-4. 🔄 **Segurança**: Configurar autenticação
+# Reinstalar dependências do frontend
+cd frontend
+npm install --force
+```
+
+### Erro: "npm install falhou"
+```bash
+# Limpar cache do npm
+npm cache clean --force
+
+# Reinstalar
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 📁 Estrutura do Projeto
+
+```
+sompo/
+├── backend/                 # API FastAPI
+│   ├── app/
+│   │   ├── main.py         # Aplicação principal
+│   │   ├── models/         # Modelos de ML
+│   │   ├── services/       # Serviços
+│   │   └── utils/          # Utilitários
+│   └── requirements.txt    # Dependências Python
+├── frontend/               # Interface React
+│   ├── src/
+│   │   ├── components/     # Componentes React
+│   │   ├── pages/          # Páginas
+│   │   └── App.js          # Aplicação principal
+│   └── package.json        # Dependências Node.js
+├── start_local.bat         # Script de inicialização
+└── INSTRUCOES_EXECUCAO.md  # Este arquivo
+```
+
+## 🎯 Funcionalidades Disponíveis
+
+### Backend (APIs)
+- ✅ **Health Check**: Status dos serviços
+- ✅ **Dashboard Overview**: Dados gerais
+- ✅ **Risk Alerts**: Alertas de risco
+- ✅ **Risk Prediction**: Predição de riscos
+- ✅ **Route Optimization**: Otimização de rotas
+- ✅ **Driver/Vehicle Scoring**: Sistema de pontuação
+
+### Frontend (Dashboard)
+- ✅ **Interface Principal**: Visão geral do sistema
+- ✅ **Links para APIs**: Acesso direto às funcionalidades
+- ✅ **Status do Sistema**: Indicadores de funcionamento
+
+## 🚀 Comandos Úteis
+
+### Desenvolvimento
+```bash
+# Backend com reload automático
+cd backend
+python -m uvicorn app.main:app --reload
+
+# Frontend com hot reload
+cd frontend
+npm start
+
+# Ver logs do backend
+# Os logs aparecem no terminal onde o backend está rodando
+
+# Ver logs do frontend
+# Os logs aparecem no terminal onde o frontend está rodando
+```
+
+### Manutenção
+```bash
+# Atualizar dependências do backend
+cd backend
+pip install -r requirements.txt --upgrade
+
+# Atualizar dependências do frontend
+cd frontend
+npm update
+
+# Limpar cache
+npm cache clean --force
+pip cache purge
+```
+
+## 💡 Dicas de Desenvolvimento
+
+### Hot Reload
+- **Backend**: Recarrega automaticamente quando você salva arquivos Python
+- **Frontend**: Recarrega automaticamente quando você salva arquivos React
+
+### Debugging
+- **Backend**: Use `print()` ou logs para debug
+- **Frontend**: Use `console.log()` e DevTools do navegador
+
+### Performance
+- **Backend**: Use `--reload` apenas em desenvolvimento
+- **Frontend**: Use `npm start` para desenvolvimento, `npm run build` para produção
+
+## 🎉 Próximos Passos
+
+1. **Execute o projeto**: `start_local.bat`
+2. **Acesse o dashboard**: http://localhost:3000
+3. **Explore as APIs**: http://localhost:8000/docs
+4. **Teste as funcionalidades**: Use a interface para navegar
+5. **Apresente para a Sompo**: Sistema pronto para demonstração!
 
 ---
 
-## 📞 Suporte
-
-Se encontrar problemas:
-1. **Verifique os logs**: `docker-compose logs -f`
-2. **Consulte a documentação**: DOCUMENTACAO.md
-3. **Verifique requisitos**: Certifique-se que Docker está rodando
-4. **Reinicie o sistema**: `docker-compose down && docker-compose up -d`
-
-**Boa sorte com a demonstração!** 🚀
+**🎯 Projeto Sompo IA - Sistema de Redução de Sinistros**

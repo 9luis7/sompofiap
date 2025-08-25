@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TruckIcon, 
-  ExclamationTriangleIcon, 
-  ChartBarIcon, 
+import {
+  TruckIcon,
+  ExclamationTriangleIcon,
+  ChartBarIcon,
   ShieldCheckIcon,
-  TrendingUpIcon,
-  TrendingDownIcon
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import OverviewCards from '../components/OverviewCards';
@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="flex items-center justify-center mb-2">
-                <TrendingDownIcon className="h-8 w-8 text-green-600" />
+                <ArrowTrendingDownIcon className="h-8 w-8 text-green-600" />
               </div>
               <p className="text-2xl font-bold text-green-600">
                 {dashboardData?.claims_reduction_percentage}%
