@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Zona Alto Risco", "level": "high" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-46.7000, -23.5750],
+          [-46.6900, -23.5900],
+          [-46.6600, -23.5850],
+          [-46.6650, -23.5650],
+          [-46.7000, -23.5750]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Zona Médio Risco", "level": "medium" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-46.6500, -23.5650],
+          [-46.6300, -23.5750],
+          [-46.6200, -23.5600],
+          [-46.6400, -23.5500],
+          [-46.6500, -23.5650]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Zona Baixo Risco", "level": "low" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-46.6400, -23.6000],
+          [-46.6100, -23.5950],
+          [-46.6000, -23.5800],
+          [-46.6250, -23.5750],
+          [-46.6400, -23.6000]
+        ]]
+      }
+    }
+  ]
+}

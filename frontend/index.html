@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sompo Seguros - Sistema de Monitoramento Inteligente</title>
+
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="Sistema de monitoramento inteligente para Sompo Seguros" />
+    <meta name="keywords" content="seguros, monitoramento, logística, tecnologia" />
+    <meta name="author" content="Sompo Seguros" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>"
+    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Leaflet CSS (Map) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="modern-styles.css?v=2" />
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-content">
+        <div class="loading-logo">
+          <div class="logo-glow">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <span class="logo-text">SOMPO SEGUROS</span>
+        </div>
+        <div class="spinner-ring"></div>
+        <p class="loading-text">Carregando sistema de monitoramento...</p>
+        <div class="loading-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="loading-progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+      <!-- Background Animation -->
+      <div class="bg-animation">
+        <div class="floating-shapes">
+          <div class="shape shape-1"></div>
+          <div class="shape shape-2"></div>
+          <div class="shape shape-3"></div>
+          <div class="shape shape-4"></div>
+          <div class="shape shape-5"></div>
+        </div>
+      </div>
+
+      <!-- Dark Mode Toggle -->
+      <div class="theme-toggle" id="login-theme-toggle">
+        <div class="theme-toggle-switch" id="login-theme-switch">
+          <i class="fas fa-sun icon sun"></i>
+          <i class="fas fa-moon icon moon"></i>
+        </div>
+      </div>
+
+      <!-- Hero Section -->
+      <div class="hero-section">
+        <div class="hero-content">
+          <div class="hero-text">
+            <h1 class="hero-title">
+              <span class="title-line">Sistema de</span>
+              <span class="title-line highlight">Monitoramento</span>
+              <span class="title-line">Inteligente</span>
+            </h1>
+            <p class="hero-subtitle">
+              Proteção avançada para suas cargas com tecnologia de ponta e monitoramento em tempo
+              real
+            </p>
+            <div class="hero-features">
+              <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Segurança 24/7</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-satellite"></i>
+                <span>GPS em Tempo Real</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Análise de Riscos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Container -->
+      <div class="login-container">
+        <div class="login-card glass-card">
+          <div class="login-header">
+            <div class="logo">
+              <div class="logo-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h2>SOMPO SEGUROS</h2>
+              <p>Acesso ao Sistema</p>
+            </div>
+          </div>
+
+          <form class="login-form" id="login-form">
+            <div class="form-group">
+              <label for="username">
+                <i class="fas fa-user"></i>
+                Usuário
+              </label>
+              <input type="text" id="username" name="username" required />
+              <div class="input-focus-border"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">
+                <i class="fas fa-lock"></i>
+                Senha
+              </label>
+              <input type="password" id="password" name="password" required />
+              <div class="input-focus-border"></div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn-login"
+              onclick="if(window.authManager) window.authManager.handleLogin(); return false;"
+            >
+              <span class="btn-text">Entrar no Sistema</span>
+              <i class="fas fa-arrow-right"></i>
+              <div class="btn-glow"></div>
+            </button>
+          </form>
+
+          <!-- Credenciais de demonstração -->
+          <div class="login-demo" style="margin-top: 1rem; color: rgba(255, 255, 255, 0.9)">
+            <div style="margin-bottom: 0.5rem; font-weight: 600">Credenciais de teste:</div>
+            <ul style="list-style: none; padding-left: 0; display: grid; gap: 0.25rem">
+              <li>
+                <a
+                  class="demo-cred"
+                  data-username="admin.sompo"
+                  data-password="password123"
+                  href="#"
+                  style="color: #fbbf24; text-decoration: underline"
+                  >admin.sompo / password123</a
+                >
+              </li>
+              <li>
+                <a
+                  class="demo-cred"
+                  data-username="joao.silva"
+                  data-password="password123"
+                  href="#"
+                  style="color: #fbbf24; text-decoration: underline"
+                  >joao.silva / password123</a
+                >
+              </li>
+              <li>
+                <a
+                  class="demo-cred"
+                  data-username="cliente.techcom"
+                  data-password="password123"
+                  href="#"
+                  style="color: #fbbf24; text-decoration: underline"
+                  >cliente.techcom / password123</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="login-footer">
+            <p>© 2024 Sompo Seguros. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="screen">
+      <!-- Navigation -->
+      <nav class="navbar glass-nav">
+        <div class="nav-brand">
+          <div class="brand-logo">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <span class="brand-text">SOMPO MONITORING</span>
+        </div>
+
+        <div class="nav-menu">
+          <div class="nav-item">
+            <a href="#" class="nav-link active" data-section="dashboard">
+              <i class="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </a>
+          </div>
+          <div class="nav-item has-dropdown">
+            <a href="#" class="nav-link" data-section="shipments">
+              <i class="fas fa-truck"></i>
+              <span>Cargas</span>
+              <i class="fas fa-chevron-down nav-caret"></i>
+            </a>
+            <div class="nav-dropdown">
+              <button class="nav-dd-item" data-action="goto:shipments">
+                <i class="fas fa-list"></i>
+                <span>Ver lista</span>
+              </button>
+              <button class="nav-dd-item" data-action="notify:Novo cadastro de carga em breve">
+                <i class="fas fa-plus"></i>
+                <span>Nova carga (em breve)</span>
+              </button>
+            </div>
+          </div>
+          <div class="nav-item has-dropdown">
+            <a href="#" class="nav-link" data-section="vehicles">
+              <i class="fas fa-car"></i>
+              <span>Veículos</span>
+              <i class="fas fa-chevron-down nav-caret"></i>
+            </a>
+            <div class="nav-dropdown">
+              <button class="nav-dd-item" data-action="goto:vehicles">
+                <i class="fas fa-car-side"></i>
+                <span>Ver frota</span>
+              </button>
+              <button class="nav-dd-item" data-action="notify:Cadastro de veículo em breve">
+                <i class="fas fa-plus"></i>
+                <span>Cadastrar veículo (em breve)</span>
+              </button>
+            </div>
+          </div>
+          <div class="nav-item has-dropdown">
+            <a href="#" class="nav-link" data-section="alerts">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Alertas</span>
+              <i class="fas fa-chevron-down nav-caret"></i>
+            </a>
+            <div class="nav-dropdown">
+              <button class="nav-dd-item" data-action="goto:alerts">
+                <i class="fas fa-bell"></i>
+                <span>Ver recentes</span>
+              </button>
+              <button class="nav-dd-item" data-action="notify:Reconhecer todos em breve">
+                <i class="fas fa-check-double"></i>
+                <span>Reconhecer todos (em breve)</span>
+              </button>
+            </div>
+          </div>
+          <div class="nav-item has-dropdown">
+            <a href="#" class="nav-link" data-section="map">
+              <i class="fas fa-map-marked-alt"></i>
+              <span>Mapa</span>
+              <i class="fas fa-chevron-down nav-caret"></i>
+            </a>
+            <div class="nav-dropdown">
+              <button class="nav-dd-item" data-action="goto:map">
+                <i class="fas fa-map"></i>
+                <span>Abrir mapa</span>
+              </button>
+              <button class="nav-dd-item" data-action="notify:Centralizar Brasil (placeholder)">
+                <i class="fas fa-crosshairs"></i>
+                <span>Centralizar Brasil</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-actions">
+          <div class="user-menu">
+            <div class="user-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <span class="user-name">Admin</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <button class="theme-toggle-btn" id="dashboard-theme-toggle">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section active">
+          <div class="section-header">
+            <h1>Dashboard de Monitoramento</h1>
+            <p>Visão geral do sistema de segurança e monitoramento</p>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card glass-card" data-target-section="shipments">
+              <div class="stat-icon success">
+                <i class="fas fa-truck"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-number">12,450</h3>
+                <p class="stat-label">Cargas Ativas</p>
+              </div>
+              <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+12%</span>
+              </div>
+            </div>
+
+            <div class="stat-card glass-card" data-target-section="alerts">
+              <div class="stat-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-number">58</h3>
+                <p class="stat-label">Alertas Críticos</p>
+              </div>
+              <div class="stat-trend negative">
+                <i class="fas fa-arrow-down"></i>
+                <span>-5%</span>
+              </div>
+            </div>
+
+            <div class="stat-card glass-card" data-target-section="map">
+              <div class="stat-icon info">
+                <i class="fas fa-route"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-number">1,250,000</h3>
+                <p class="stat-label">Km Monitorados</p>
+              </div>
+              <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+8%</span>
+              </div>
+            </div>
+
+            <div class="stat-card glass-card" data-target-section="vehicles">
+              <div class="stat-icon primary">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-number">99.7%</h3>
+                <p class="stat-label">Taxa de Segurança</p>
+              </div>
+              <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+0.2%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div class="charts-grid">
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Status das Cargas</h3>
+                <div class="chart-actions">
+                  <button class="btn-icon">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="chart-content">
+                <canvas id="chart-status" height="140"></canvas>
+              </div>
+              <div id="status-details" class="chart-details"></div>
+            </div>
+
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Alertas por Região</h3>
+                <div class="chart-actions">
+                  <button class="btn-icon">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="chart-content">
+                <canvas id="chart-alerts" height="140"></canvas>
+              </div>
+              <div id="alerts-details" class="chart-details"></div>
+            </div>
+
+            <div class="chart-card glass-card">
+              <div class="chart-header">
+                <h3>Mapa Rápido</h3>
+                <div class="chart-actions">
+                  <button class="btn-icon">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="chart-content" style="min-height: 220px">
+                <div
+                  id="map-mini"
+                  class="mini-map"
+                  style="width: 100%; height: 200px; border-radius: 12px"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Shipments Section -->
+        <section id="shipments-section" class="content-section">
+          <div class="section-header">
+            <h1>Cargas</h1>
+            <p>Listagem e status das cargas em trânsito</p>
+          </div>
+          <div class="chart-card glass-card">
+            <div class="chart-header">
+              <h3>Minhas Cargas</h3>
+            </div>
+            <div class="chart-content">
+              <div id="shipments-list" class="data-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Vehicles Section -->
+        <section id="vehicles-section" class="content-section">
+          <div class="section-header">
+            <h1>Veículos</h1>
+            <p>Frota monitorada e sua telemetria</p>
+          </div>
+          <div class="chart-card glass-card">
+            <div class="chart-header">
+              <h3>Frota</h3>
+            </div>
+            <div class="chart-content">
+              <div id="vehicles-list" class="data-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Alerts Section -->
+        <section id="alerts-section" class="content-section">
+          <div class="section-header">
+            <h1>Alertas</h1>
+            <p>Eventos e notificações em tempo real</p>
+          </div>
+          <div class="chart-card glass-card">
+            <div class="chart-header">
+              <h3>Alertas Recentes</h3>
+            </div>
+            <div class="chart-content">
+              <div id="alerts-list" class="data-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Map Section -->
+        <section id="map-section" class="content-section">
+          <div class="section-header">
+            <h1>Mapa</h1>
+            <p>Visualização geográfica de veículos e zonas de risco</p>
+          </div>
+          <div class="chart-card glass-card">
+            <div class="chart-header">
+              <h3>Mapa Interativo</h3>
+            </div>
+            <div class="chart-content" style="min-height: 400px">
+              <div id="map-full" style="width: 100%; height: 380px; border-radius: 12px"></div>
+              <div id="map-shipments-panel" class="data-list" style="margin-top: 12px"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js?v=2"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Leaflet JS (Map) -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <!-- Leaflet.heat plugin for heatmap layer -->
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="modern-app.js?v=2"></script>
+  </body>
+</html>
