@@ -282,6 +282,9 @@ class SompoApp {
     this.generateDemoDataset();
     this.initializeCharts();
     this.initMiniMap();
+
+    // Guided Tour
+    this.setupGuidedTour();
   }
 
   animateStatsCards() {
@@ -299,34 +302,182 @@ class SompoApp {
   }
 
   setupRealTimeUpdates() {
-    // Simulate real-time data updates
-    setInterval(() => {
-      this.updateRandomStats();
-      this.updateChartsWithCurrentStats();
-    }, 4000);
-  }
+    // Initialize metric state from current UI
+    this.initializeMetricsFromUI();
 
-  updateRandomStats() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    statNumbers.forEach(stat => {
-      const currentValue = parseInt(stat.textContent.replace(/[^\d]/g, ''));
-      const scale = currentValue > 100000 ? 5000 : currentValue > 1000 ? 50 : 5;
-      const variation = Math.floor(Math.random() * scale - scale / 2);
-      const newValue = Math.max(0, currentValue + variation);
-
-      if (stat.textContent.includes('%')) {
-        stat.textContent = (newValue / 10).toFixed(1) + '%';
-      } else if (/\d{1,3}(,\d{3})+/.test(stat.textContent) || currentValue > 999) {
-        stat.textContent = newValue.toLocaleString('en-US');
-      } else {
-        stat.textContent = newValue;
+    // Demo Mode controls
+    this._demoPaused = !(window.CONFIG && window.CONFIG.DEMO && window.CONFIG.DEMO.AUTOPLAY);
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'p' || e.key === 'P') && (e.ctrlKey || e.metaKey)) {
+        this._demoPaused = !this._demoPaused;
+        const state = this._demoPaused ? 'pausado' : 'retomado';
+        this.showNotification(`Modo demo ${state} (Ctrl+P)`, 'info');
       }
     });
+
+    // Start independent, staggered update loops for each metric
+    this.startShipmentsLoop();
+    this.startAlertsLoop();
+    this.startSecurityLoop();
+    this.startKmLoop();
+  }
+
+  initializeMetricsFromUI() {
+    const getNumber = sel => {
+      const el = document.querySelector(sel);
+      if (!el) {
+        return 0;
+      }
+      const t = (el.textContent || '').replace(/[^0-9.]/g, '');
+      return parseFloat(t || '0');
+    };
+
+    this.metrics = {
+      shipments: getNumber('[data-metric="shipments"]') || 0,
+      alerts: getNumber('[data-metric="alerts"]') || 0,
+      km: getNumber('[data-metric="km"]') || 0,
+      security: getNumber('[data-metric="security"]') || 99.5,
+    };
+
+    // Baseline distribution for charts derived from shipments
+    this.metricsDist = this.computeStatusDistribution(this.metrics.shipments);
+  }
+
+  // Compute load status buckets from a total count
+  computeStatusDistribution(totalShipments) {
+    const loading = Math.floor(totalShipments * 0.12);
+    const stopped = Math.floor(totalShipments * 0.06);
+    const inTransit = Math.max(0, totalShipments - loading - stopped);
+    return { inTransit, loading, stopped };
+  }
+
+  // Animates metric number changes with formatting per-metric
+  animateMetricTo(metricName, newValue) {
+    const el = document.querySelector(`[data-metric="${metricName}"]`);
+    if (!el) {
+      return;
+    }
+
+    const currentText = el.textContent || '';
+    const parse = txt => parseFloat((txt || '').replace(/[^0-9.]/g, '') || '0');
+    const from = parse(currentText);
+    const to = newValue;
+    const start = performance.now();
+    const duration = 650;
+
+    const format = (name, val) => {
+      if (name === 'security') {
+        return `${val.toFixed(1)}%`;
+      }
+      const intVal = Math.round(val);
+      return intVal.toLocaleString('en-US');
+    };
+
+    const step = now => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
+      const val = from + (to - from) * eased;
+      el.textContent = format(metricName, metricName === 'security' ? val : Math.max(0, val));
+      if (t < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  startShipmentsLoop() {
+    const tick = () => {
+      if (this._demoPaused) {
+        this._shipmentsTimer = setTimeout(tick, 1000);
+        return;
+      }
+      const drift = Math.floor(Math.random() * 180 - 90); // -90..+90
+      const target = Math.max(500, Math.round(this.metrics.shipments + drift));
+      this.metrics.shipments = target;
+      this.metricsDist = this.computeStatusDistribution(this.metrics.shipments);
+      this.animateMetricTo('shipments', this.metrics.shipments);
+      this.updateChartsWithCurrentStats();
+      const cfg = (window.CONFIG && window.CONFIG.DEMO) || {};
+      const min = cfg.SHIPMENTS_MIN_MS || 3000;
+      const max = cfg.SHIPMENTS_MAX_MS || 7000;
+      const next = min + Math.random() * Math.max(0, max - min);
+      this._shipmentsTimer = setTimeout(tick, next);
+    };
+    tick();
+  }
+
+  startAlertsLoop() {
+    const tick = () => {
+      if (this._demoPaused) {
+        this._alertsTimer = setTimeout(tick, 1000);
+        return;
+      }
+      // Alerts rate linked to shipments and security (kept > 0 to avoid empty chart)
+      const baseRate = 0.005; // 0.5%
+      const securityPenalty = Math.max(0, (100 - this.metrics.security) / 100) * 0.02; // up to +2%
+      const noise = (Math.random() - 0.5) * 0.001; // +-0.1%
+      let rate = baseRate + securityPenalty + noise;
+      rate = Math.max(0.0005, Math.min(0.008, rate)); // clamp to ~0.05%-0.8%
+      const target = Math.round(this.metrics.shipments * rate);
+      this.metrics.alerts = Math.max(0, target);
+      this.animateMetricTo('alerts', this.metrics.alerts);
+      // keep chart bars subtly refreshed
+      this.updateChartsWithCurrentStats();
+      const cfg = (window.CONFIG && window.CONFIG.DEMO) || {};
+      const min = cfg.ALERTS_MIN_MS || 4500;
+      const max = cfg.ALERTS_MAX_MS || 8000;
+      const next = min + Math.random() * Math.max(0, max - min);
+      this._alertsTimer = setTimeout(tick, next);
+    };
+    tick();
+  }
+
+  startSecurityLoop() {
+    const tick = () => {
+      if (this._demoPaused) {
+        this._securityTimer = setTimeout(tick, 1000);
+        return;
+      }
+      const ratio = this.metrics.shipments > 0 ? this.metrics.alerts / this.metrics.shipments : 0;
+      let target = 100 - ratio * 120; // more alerts => lower security
+      target += (Math.random() - 0.5) * 0.4; // jitter +-0.2
+      target = Math.max(96.5, Math.min(99.9, target));
+      this.metrics.security = target;
+      this.animateMetricTo('security', this.metrics.security);
+      const cfg = (window.CONFIG && window.CONFIG.DEMO) || {};
+      const min = cfg.SECURITY_MIN_MS || 5500;
+      const max = cfg.SECURITY_MAX_MS || 10000;
+      const next = min + Math.random() * Math.max(0, max - min);
+      this._securityTimer = setTimeout(tick, next);
+    };
+    tick();
+  }
+
+  startKmLoop() {
+    // Incremental per-second accumulation correlated with shipments in transit
+    const tick = () => {
+      if (this._demoPaused) {
+        this._kmTimer = setTimeout(tick, 1000);
+        return;
+      }
+      const inTransit = this.metricsDist.inTransit || Math.round(this.metrics.shipments * 0.82);
+      const perShipmentPerSec = 0.0008; // km per shipment per second (synthetic)
+      const jitter = 0.6 + Math.random() * 0.8; // 0.6..1.4x
+      const delta = inTransit * perShipmentPerSec * jitter;
+      this.metrics.km = Math.max(0, this.metrics.km + delta);
+      this.animateMetricTo('km', this.metrics.km);
+      const cfg = (window.CONFIG && window.CONFIG.DEMO) || {};
+      const interval = cfg.KM_INTERVAL_MS || 1000;
+      this._kmTimer = setTimeout(tick, interval);
+    };
+    tick();
   }
 
   updateChartsWithCurrentStats() {
-    const activeShipments = this.getStatNumber('[data-target-section="shipments"] .stat-number');
-    // const criticalAlerts = this.getStatNumber('[data-target-section="alerts"] .stat-number');
+    const activeShipments =
+      this.metrics && this.metrics.shipments
+        ? this.metrics.shipments
+        : this.getStatNumber('[data-target-section="shipments"] .stat-number');
     if (this.charts.status) {
       const baseLoading = Math.floor(activeShipments * 0.12);
       const baseStopped = Math.floor(activeShipments * 0.06);
@@ -336,9 +487,30 @@ class SompoApp {
     }
     if (this.charts.alerts) {
       const regions = this.charts.alerts.data.labels || ['SP', 'RJ', 'MG'];
-      const regData = regions.map(
-        (_, i) => Math.floor(3 / regions.length) + (i < 3 % regions.length ? 1 : 0)
-      );
+      const totalAlerts = this.metrics && this.metrics.alerts ? this.metrics.alerts : 0;
+      // Prefer proportional scaling from demo dataset when available
+      let baseCounts = [];
+      if (this.demoData && Array.isArray(this.demoData.alerts) && this.demoData.alerts.length) {
+        baseCounts = this.countAlertsByRegion(regions);
+      }
+      const sumBase = baseCounts.reduce((a, b) => a + b, 0);
+      let regData;
+      if (sumBase > 0 && totalAlerts > 0) {
+        // Scale base distribution to match totalAlerts
+        const scale = totalAlerts / sumBase;
+        const floats = baseCounts.map(v => v * scale);
+        // Round while preserving sum
+        regData = floats.map(v => Math.floor(v));
+        let remaining = totalAlerts - regData.reduce((a, b) => a + b, 0);
+        for (let i = 0; i < regData.length && remaining > 0; i++) {
+          regData[i] += 1;
+          remaining--;
+        }
+      } else {
+        // Even split fallback
+        const base = Math.floor(totalAlerts / regions.length);
+        regData = regions.map((_, i) => base + (i < totalAlerts % regions.length ? 1 : 0));
+      }
       this.charts.alerts.data.datasets[0].data = regData;
       this.charts.alerts.update('none');
     }
@@ -1715,6 +1887,218 @@ class SompoApp {
   }
 
   // Utility methods
+  setupGuidedTour() {
+    const cfg = (window.CONFIG && window.CONFIG.TOUR) || {};
+    if (!cfg.ENABLED) {
+      return;
+    }
+
+    // Autostart only once per session
+    const hasSeen = sessionStorage.getItem('sompo-tour-seen');
+    if (cfg.AUTOSTART && !hasSeen) {
+      setTimeout(() => this.startTour(), 600);
+      sessionStorage.setItem('sompo-tour-seen', '1');
+    }
+    // Inject button in navbar actions if exists
+    try {
+      const actions = document.querySelector('.nav-actions');
+      if (actions && !actions.querySelector('.tour-btn')) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-icon tour-btn';
+        btn.title = 'Iniciar tour (Ctrl+T)';
+        btn.innerHTML = '<i class="fas fa-route"></i>';
+        btn.addEventListener('click', () => this.startTour());
+        actions.insertBefore(btn, actions.firstChild);
+      }
+    } catch (_) {}
+  }
+
+  startTour() {
+    const cfg = (window.CONFIG && window.CONFIG.TOUR) || {};
+    const steps = Array.isArray(cfg.STEPS) ? cfg.STEPS : [];
+    if (!steps.length) {
+      return;
+    }
+
+    // Build overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'tour-overlay';
+    overlay.innerHTML = `
+      <div class="tour-backdrop"></div>
+      <div class="tour-popover">
+        <div class="tour-header">
+          <div class="tour-title"></div>
+          <button class="tour-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="tour-body"></div>
+        <div class="tour-footer">
+          <button class="tour-prev">Voltar</button>
+          <div class="tour-steps"></div>
+          <button class="tour-next">Próximo</button>
+        </div>
+      </div>`;
+    // Lock scrolling and interactions outside
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.body.appendChild(overlay);
+
+    const state = { idx: 0 };
+    const q = sel => overlay.querySelector(sel);
+    const titleEl = q('.tour-title');
+    const bodyEl = q('.tour-body');
+    const stepsEl = q('.tour-steps');
+    const pop = q('.tour-popover');
+
+    const highlight = document.createElement('div');
+    highlight.className = 'tour-highlight';
+    overlay.appendChild(highlight);
+
+    const renderDots = () => {
+      stepsEl.innerHTML = steps
+        .map((_, i) => `<span class="dot ${i === state.idx ? 'active' : ''}"></span>`) 
+        .join('');
+    };
+
+    const placePopover = target => {
+      const rect = target.getBoundingClientRect();
+      // Highlight box
+      highlight.style.left = rect.left + 'px';
+      highlight.style.top = rect.top + 'px';
+      highlight.style.width = rect.width + 'px';
+      highlight.style.height = rect.height + 'px';
+      // Popover below or above
+      const prefersAbove = rect.bottom + 200 > window.innerHeight;
+      pop.style.left = Math.max(16, rect.left) + 'px';
+      pop.style.top = (prefersAbove ? rect.top - 160 : rect.bottom + 12) + 'px';
+    };
+
+    const ensureVisible = target => {
+      if (!target) {
+        return;
+      }
+      const rect = target.getBoundingClientRect();
+      const fullyVisible = rect.top >= 64 && rect.bottom <= window.innerHeight - 24;
+      if (!fullyVisible) {
+        const absoluteY = rect.top + window.scrollY;
+        const center = absoluteY - (window.innerHeight / 2 - Math.min(180, rect.height / 2));
+        try {
+          window.scrollTo({ top: Math.max(0, center), behavior: 'smooth' });
+        } catch (_) {
+          window.scrollTo(0, Math.max(0, center));
+        }
+      }
+    };
+
+    const showStep = idx => {
+      state.idx = Math.max(0, Math.min(steps.length - 1, idx));
+      const step = steps[state.idx];
+      const target = document.querySelector(step.selector);
+      titleEl.textContent = step.title || '';
+      bodyEl.textContent = step.body || '';
+      renderDots();
+      if (target) {
+        ensureVisible(target);
+        // Place after potential scroll
+        setTimeout(() => placePopover(target), 120);
+      }
+
+      // If step requires user action, arm the listener and disable next button
+      const nextBtn = q('.tour-next');
+      const prevBtn = q('.tour-prev');
+      nextBtn.disabled = false;
+      prevBtn.disabled = state.idx === 0;
+      // Clean any previous guards
+      overlay.querySelectorAll('[data-tour-guard]').forEach(el => el.remove());
+      if (step.requireAction && step.requireAction === 'click' && target) {
+        nextBtn.disabled = true;
+        // Visual hint overlay over the target to indicate click
+        const hint = document.createElement('div');
+        hint.setAttribute('data-tour-guard', '');
+        hint.className = 'tour-hint';
+        overlay.appendChild(hint);
+        const rect = target.getBoundingClientRect();
+        hint.style.left = rect.left + rect.width / 2 - 16 + 'px';
+        hint.style.top = rect.top + rect.height / 2 - 16 + 'px';
+        // Click-through hole to capture user click even com overlay ativo
+        const hole = document.createElement('div');
+        hole.setAttribute('data-tour-guard', '');
+        hole.className = 'tour-hole';
+        hole.style.left = rect.left + 'px';
+        hole.style.top = rect.top + 'px';
+        hole.style.width = rect.width + 'px';
+        hole.style.height = rect.height + 'px';
+        hole.addEventListener('click', e => {
+          // Propagate a synthetic pointer event to the underlying canvas (Chart.js)
+          try {
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const evt = new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+              clientX: cx,
+              clientY: cy,
+            });
+            target.dispatchEvent(evt);
+          } catch (_) {
+            try { target.click(); } catch (__) {}
+          }
+          setTimeout(completeCheck, 120);
+          e.stopPropagation();
+          e.preventDefault();
+        });
+        overlay.appendChild(hole);
+        // Listener to detect completion
+        const completeCheck = () => {
+          const doneSel = step.doneWhenSelector;
+          if (doneSel) {
+            const doneEl = document.querySelector(doneSel);
+            if (doneEl && doneEl.innerHTML && doneEl.innerHTML.trim().length > 0) {
+              nextBtn.disabled = false;
+              hint.remove();
+              // Small narrative addendum
+              bodyEl.textContent = (step.body || '') + ' Agora você está vendo os detalhes.';
+              // Auto-advance after short delay
+              setTimeout(() => { if (!nextBtn.disabled) nextBtn.click(); }, 900);
+            }
+          }
+        };
+        // Hook generic click and chart updates
+        target.addEventListener('click', () => setTimeout(completeCheck, 100), { once: true });
+        // Also poll as fallback if chart triggers async updates
+        let tries = 0;
+        const poll = setInterval(() => {
+          completeCheck();
+          tries++;
+          if (!nextBtn.disabled || tries > 40) {
+            clearInterval(poll);
+          }
+        }, 150);
+      }
+    };
+
+    q('.tour-next').addEventListener('click', () => {
+      if (state.idx < steps.length - 1) {
+        showStep(state.idx + 1);
+      } else {
+        cleanup();
+      }
+    });
+    q('.tour-prev').addEventListener('click', () => showStep(state.idx - 1));
+    q('.tour-close').addEventListener('click', () => cleanup());
+    // Não fechar ao clicar fora; navegação fica travada até concluir ou fechar no X
+
+    const onResize = () => showStep(state.idx);
+    window.addEventListener('resize', onResize);
+
+    const cleanup = () => {
+      window.removeEventListener('resize', onResize);
+      try { document.body.removeChild(overlay); } catch (_) {}
+      document.body.style.overflow = prevOverflow || '';
+    };
+
+    showStep(0);
+  }
 }
 
 // Notification styles
@@ -1772,6 +2156,23 @@ const notificationStyles = `
         background: rgba(0, 0, 0, 0.05);
         color: var(--text-primary);
     }
+
+    /* Tour styles */
+    .tour-overlay{position:fixed;inset:0;z-index:9998;pointer-events:auto}
+    .tour-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+    .tour-highlight{position:absolute;border:2px solid var(--primary-color);border-radius:12px;box-shadow:0 0 0 20000px rgba(0,0,0,.45);transition:all .25s ease;pointer-events:none}
+    .tour-popover{position:absolute;z-index:9999;background:var(--card-background);border:1px solid var(--border-color);border-radius:12px;box-shadow:var(--shadow-lg);padding:12px;min-width:260px;max-width:360px}
+    .tour-header{display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--text-primary);margin-bottom:6px}
+    .tour-body{color:var(--text-secondary);font-size:14px;margin-bottom:10px}
+    .tour-footer{display:flex;justify-content:space-between;align-items:center}
+    .tour-prev,.tour-next{background:var(--primary-color);color:#fff;border:none;border-radius:8px;padding:6px 10px;cursor:pointer}
+    .tour-prev{background:#64748b}
+    .tour-steps{display:flex;gap:6px}
+    .tour-steps .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block}
+    .tour-steps .dot.active{background:var(--primary-color)}
+    .tour-hint{position:absolute;width:32px;height:32px;border-radius:50%;border:2px solid var(--primary-color);box-shadow:0 0 0 8px rgba(59,130,246,.25);animation:pulse 1.4s ease-in-out infinite}
+    @keyframes pulse{0%{transform:scale(.9);opacity:.85}50%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.85}}
+    .tour-hole{position:absolute;border-radius:12px;cursor:pointer;z-index:10000}
 `;
 
 // Add notification styles to page

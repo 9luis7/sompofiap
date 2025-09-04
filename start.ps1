@@ -75,6 +75,31 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "✅ Dependências Python instaladas" -ForegroundColor Green
 
+# Instalar dependências do Backend e compilar
+Write-Host ""
+Write-Host "[3.1/5] Instalando dependências do Backend..." -ForegroundColor Blue
+Push-Location "backend"
+if (-not (Test-Path "node_modules")) {
+    Write-Host "📦 Instalando dependências do Backend..." -ForegroundColor Yellow
+    npm install
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ Erro ao instalar dependências do Backend" -ForegroundColor Red
+        Pop-Location
+        Read-Host "Pressione Enter para sair"
+        exit 1
+    }
+    Write-Host "✅ Dependências do Backend instaladas" -ForegroundColor Green
+} else {
+    Write-Host "✅ Dependências do Backend já instaladas" -ForegroundColor Green
+}
+
+Write-Host "Compilando Backend..." -ForegroundColor Yellow
+npm run build
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "⚠️  Falha ao compilar com TypeScript. Será usado o servidor simples (simple-server.js) se necessário." -ForegroundColor Yellow
+}
+Pop-Location
+
 # Verificar qualidade do código
 Write-Host ""
 Write-Host "[5/5] Verificando qualidade do código..." -ForegroundColor Blue
@@ -97,16 +122,16 @@ Write-Host ""
 Write-Host "Iniciando sistema em terminais separados..." -ForegroundColor Green
 Write-Host ""
 
-# Abrir terminal para o backend
+# Abrir terminal para o backend (CMD)
 Write-Host "🚀 Iniciando Backend..." -ForegroundColor Blue
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; `$Host.UI.RawUI.WindowTitle = 'Sompo Backend'; Write-Host '🚀 Iniciando Backend...' -ForegroundColor Green; npm run backend"
+Start-Process -FilePath cmd.exe -ArgumentList "/k", "cd /d `"$PWD`" && title Sompo Backend && echo 🚀 Iniciando Backend... && npm run backend"
 
 # Aguardar um pouco para o backend inicializar
 Start-Sleep -Seconds 3
 
-# Abrir terminal para o frontend
+# Abrir terminal para o frontend (CMD)
 Write-Host "🌐 Iniciando Frontend..." -ForegroundColor Blue
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; `$Host.UI.RawUI.WindowTitle = 'Sompo Frontend'; Write-Host '🌐 Iniciando Frontend...' -ForegroundColor Green; Start-Sleep -Seconds 2; npm run frontend"
+Start-Process -FilePath cmd.exe -ArgumentList "/k", "cd /d `"$PWD`" && title Sompo Frontend && echo 🌐 Iniciando Frontend... && timeout /t 2 /nobreak >nul && npm run frontend"
 
 Write-Host ""
 Write-Host "✅ Sistema iniciado com sucesso!" -ForegroundColor Green

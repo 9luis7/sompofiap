@@ -149,11 +149,11 @@ body {
   height: 4px;
   border-radius: 2px;
   background: rgb(255 255 255 / 30%);
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .progress-fill {
-    height: 100%;
+  height: 100%;
   border-radius: 2px;
   background: white;
   animation: progress 3s ease-in-out infinite;
@@ -161,7 +161,7 @@ body {
 
 /* Screen Management */
 .screen {
-    position: relative;
+  position: relative;
   display: none;
   min-height: 100vh;
 }
@@ -173,8 +173,8 @@ body {
 /* Background Animation */
 .bg-animation {
   position: fixed;
-    top: 0;
-    left: 0;
+  top: 0;
+  left: 0;
   z-index: -1;
   width: 100%;
   height: 100%;
@@ -244,7 +244,7 @@ body {
 }
 
 .theme-toggle-switch {
-    position: relative;
+  position: relative;
   width: 60px;
   height: 30px;
   padding: 2px;
@@ -262,7 +262,7 @@ body {
 }
 
 .theme-toggle-switch .icon {
-    position: absolute;
+  position: absolute;
   top: 50%;
   font-size: 14px;
   transition: var(--transition);
@@ -338,8 +338,8 @@ body {
 }
 
 .feature-item {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
   color: rgb(255 255 255 / 90%);
   font-weight: 500;
@@ -352,7 +352,7 @@ body {
 
 /* Login Container */
 .login-container {
-    position: absolute;
+  position: absolute;
   top: 50%;
   right: 10%;
   z-index: 10;
@@ -389,7 +389,7 @@ body {
   margin: 0 auto 1rem;
   border-radius: 50%;
   background: var(--gradient-primary);
-    color: white;
+  color: white;
   font-size: 1.5rem;
   box-shadow: var(--shadow-primary);
 }
@@ -431,7 +431,7 @@ body {
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: var(--radius);
   background: rgb(255 255 255 / 10%);
-    color: white;
+  color: white;
   font-size: 1rem;
   transition: var(--transition);
   backdrop-filter: blur(10px);
@@ -464,7 +464,7 @@ body {
 
 /* Button Styles */
 .btn-login {
-    position: relative;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -478,7 +478,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-    overflow: hidden;
+  overflow: hidden;
   gap: 0.5rem;
 }
 
@@ -492,17 +492,17 @@ body {
 }
 
 .btn-glow {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 20%), transparent);
   transition: left 0.5s;
 }
 
 .btn-login:hover .btn-glow {
-    left: 100%;
+  left: 100%;
 }
 
 .login-footer {
@@ -520,7 +520,7 @@ body {
 /* Dashboard Styles */
 .navbar {
   position: fixed;
-    top: 0;
+  top: 0;
   right: 0;
   left: 0;
   z-index: 1000;
@@ -534,8 +534,8 @@ body {
 }
 
 .nav-brand {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -545,7 +545,7 @@ body {
   align-items: center;
   width: 40px;
   height: 40px;
-    border-radius: 50%;
+  border-radius: 50%;
   background: var(--gradient-primary);
   color: white;
   font-size: 1.2rem;
@@ -589,9 +589,9 @@ body {
 }
 
 .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Dropdown */
@@ -641,7 +641,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-    padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: var(--radius);
   cursor: pointer;
   transition: var(--transition);
@@ -652,14 +652,14 @@ body {
 }
 
 .user-avatar {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
   align-items: center;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: var(--gradient-primary);
-    color: white;
+  color: white;
   font-size: 0.9rem;
 }
 
@@ -727,20 +727,20 @@ body {
 }
 
 .stat-card {
-    position: relative;
+  position: relative;
   padding: 1.5rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   background: var(--card-background);
   transition: var(--transition);
   backdrop-filter: var(--glass-blur);
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .stat-card::before {
-    position: absolute;
-    top: 0;
-    right: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
   left: 0;
   height: 4px;
   background: var(--gradient-primary);
@@ -799,7 +799,7 @@ body {
 }
 
 .stat-trend {
-    position: absolute;
+  position: absolute;
   top: 1.5rem;
   right: 1.5rem;
   display: flex;
@@ -864,7 +864,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 50%;
   background: transparent;
-    color: var(--text-secondary);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: var(--transition);
 }
@@ -894,7 +894,7 @@ canvas {
 
 /* Fallback charts (no CDN) */
 .donut-chart {
-    position: relative;
+  position: relative;
   width: 180px;
   height: 180px;
   border-radius: 50%;
@@ -902,7 +902,7 @@ canvas {
 }
 
 .donut-chart::after {
-    position: absolute;
+  position: absolute;
   border-radius: 50%;
   background: var(--card-background);
   content: '';
@@ -952,10 +952,10 @@ canvas {
 }
 
 .bars-chart .bar::after {
-    position: absolute;
+  position: absolute;
   bottom: -22px;
-    left: 50%;
-    color: var(--text-secondary);
+  left: 50%;
+  color: var(--text-secondary);
   font-size: 0.85rem;
   content: attr(data-label);
   transform: translateX(-50%);
@@ -963,16 +963,16 @@ canvas {
 
 /* Fallback map */
 .fake-map {
-    position: relative;
+  position: relative;
   width: 100%;
   height: 100%;
   border-radius: 12px;
   background: linear-gradient(180deg, #e5e7eb, #f1f5f9);
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .fake-map .marker {
-    position: absolute;
+  position: absolute;
   width: 10px;
   height: 10px;
   border: 2px solid white;
