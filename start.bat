@@ -53,6 +53,32 @@ if not exist "node_modules" (
     echo ✅ Dependências Node.js já instaladas
 )
 
+:: Instalar dependências do Backend (projeto TypeScript separado)
+echo.
+echo [3.1/5] Instalando dependências do Backend...
+pushd backend >nul
+if not exist "node_modules" (
+    echo 📦 Instalando dependências do Backend...
+    npm install
+    if %errorlevel% neq 0 (
+        echo ❌ Erro ao instalar dependências do Backend
+        popd >nul
+        pause
+        exit /b 1
+    )
+    echo ✅ Dependências do Backend instaladas
+) else (
+    echo ✅ Dependências do Backend já instaladas
+)
+
+:: Compilar Backend (TypeScript -> dist)
+echo Compilando Backend...
+npm run build
+if %errorlevel% neq 0 (
+    echo ⚠️  Falha ao compilar com TypeScript. Tentando servidor simples...
+)
+popd >nul
+
 :: Instalar dependências Python
 echo.
 echo [4/5] Instalando dependências Python...

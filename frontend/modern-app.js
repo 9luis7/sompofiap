@@ -299,34 +299,145 @@ class SompoApp {
   }
 
   setupRealTimeUpdates() {
-    // Simulate real-time data updates
-    setInterval(() => {
-      this.updateRandomStats();
-      this.updateChartsWithCurrentStats();
-    }, 4000);
+    // Initialize metric state from current UI
+    this.initializeMetricsFromUI();
+
+    // Start independent, staggered update loops for each metric
+    this.startShipmentsLoop();
+    this.startAlertsLoop();
+    this.startSecurityLoop();
+    this.startKmLoop();
   }
 
-  updateRandomStats() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    statNumbers.forEach(stat => {
-      const currentValue = parseInt(stat.textContent.replace(/[^\d]/g, ''));
-      const scale = currentValue > 100000 ? 5000 : currentValue > 1000 ? 50 : 5;
-      const variation = Math.floor(Math.random() * scale - scale / 2);
-      const newValue = Math.max(0, currentValue + variation);
-
-      if (stat.textContent.includes('%')) {
-        stat.textContent = (newValue / 10).toFixed(1) + '%';
-      } else if (/\d{1,3}(,\d{3})+/.test(stat.textContent) || currentValue > 999) {
-        stat.textContent = newValue.toLocaleString('en-US');
-      } else {
-        stat.textContent = newValue;
+  initializeMetricsFromUI() {
+    const getNumber = sel => {
+      const el = document.querySelector(sel);
+      if (!el) {
+        return 0;
       }
-    });
+      const t = (el.textContent || '').replace(/[^0-9.]/g, '');
+      return parseFloat(t || '0');
+    };
+
+    this.metrics = {
+      shipments: getNumber('[data-metric="shipments"]') || 0,
+      alerts: getNumber('[data-metric="alerts"]') || 0,
+      km: getNumber('[data-metric="km"]') || 0,
+      security: getNumber('[data-metric="security"]') || 99.5,
+    };
+
+    // Baseline distribution for charts derived from shipments
+    this.metricsDist = this.computeStatusDistribution(this.metrics.shipments);
+  }
+
+  // Compute load status buckets from a total count
+  computeStatusDistribution(totalShipments) {
+    const loading = Math.floor(totalShipments * 0.12);
+    const stopped = Math.floor(totalShipments * 0.06);
+    const inTransit = Math.max(0, totalShipments - loading - stopped);
+    return { inTransit, loading, stopped };
+  }
+
+  // Animates metric number changes with formatting per-metric
+  animateMetricTo(metricName, newValue) {
+    const el = document.querySelector(`[data-metric="${metricName}"]`);
+    if (!el) {
+      return;
+    }
+
+    const currentText = el.textContent || '';
+    const parse = txt => parseFloat((txt || '').replace(/[^0-9.]/g, '') || '0');
+    const from = parse(currentText);
+    const to = newValue;
+    const start = performance.now();
+    const duration = 650;
+
+    const format = (name, val) => {
+      if (name === 'security') {
+        return `${val.toFixed(1)}%`;
+      }
+      const intVal = Math.round(val);
+      return intVal.toLocaleString('en-US');
+    };
+
+    const step = now => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease-in-out
+      const val = from + (to - from) * eased;
+      el.textContent = format(metricName, metricName === 'security' ? val : Math.max(0, val));
+      if (t < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  startShipmentsLoop() {
+    const tick = () => {
+      const drift = Math.floor(Math.random() * 180 - 90); // -90..+90
+      const target = Math.max(500, Math.round(this.metrics.shipments + drift));
+      this.metrics.shipments = target;
+      this.metricsDist = this.computeStatusDistribution(this.metrics.shipments);
+      this.animateMetricTo('shipments', this.metrics.shipments);
+      this.updateChartsWithCurrentStats();
+      const next = 3000 + Math.random() * 4000; // 3-7s
+      this._shipmentsTimer = setTimeout(tick, next);
+    };
+    tick();
+  }
+
+  startAlertsLoop() {
+    const tick = () => {
+      // Alerts rate linked to shipments and security (kept > 0 to avoid empty chart)
+      const baseRate = 0.005; // 0.5%
+      const securityPenalty = Math.max(0, (100 - this.metrics.security) / 100) * 0.02; // up to +2%
+      const noise = (Math.random() - 0.5) * 0.001; // +-0.1%
+      let rate = baseRate + securityPenalty + noise;
+      rate = Math.max(0.0005, Math.min(0.008, rate)); // clamp to ~0.05%-0.8%
+      const target = Math.round(this.metrics.shipments * rate);
+      this.metrics.alerts = Math.max(0, target);
+      this.animateMetricTo('alerts', this.metrics.alerts);
+      // keep chart bars subtly refreshed
+      this.updateChartsWithCurrentStats();
+      const next = 4500 + Math.random() * 3500; // 4.5-8s
+      this._alertsTimer = setTimeout(tick, next);
+    };
+    tick();
+  }
+
+  startSecurityLoop() {
+    const tick = () => {
+      const ratio = this.metrics.shipments > 0 ? this.metrics.alerts / this.metrics.shipments : 0;
+      let target = 100 - ratio * 120; // more alerts => lower security
+      target += (Math.random() - 0.5) * 0.4; // jitter +-0.2
+      target = Math.max(96.5, Math.min(99.9, target));
+      this.metrics.security = target;
+      this.animateMetricTo('security', this.metrics.security);
+      const next = 5500 + Math.random() * 4500; // 5.5-10s
+      this._securityTimer = setTimeout(tick, next);
+    };
+    tick();
+  }
+
+  startKmLoop() {
+    // Incremental per-second accumulation correlated with shipments in transit
+    const tick = () => {
+      const inTransit = this.metricsDist.inTransit || Math.round(this.metrics.shipments * 0.82);
+      const perShipmentPerSec = 0.0008; // km per shipment per second (synthetic)
+      const jitter = 0.6 + Math.random() * 0.8; // 0.6..1.4x
+      const delta = inTransit * perShipmentPerSec * jitter;
+      this.metrics.km = Math.max(0, this.metrics.km + delta);
+      this.animateMetricTo('km', this.metrics.km);
+      this._kmTimer = setTimeout(tick, 1000);
+    };
+    tick();
   }
 
   updateChartsWithCurrentStats() {
-    const activeShipments = this.getStatNumber('[data-target-section="shipments"] .stat-number');
-    // const criticalAlerts = this.getStatNumber('[data-target-section="alerts"] .stat-number');
+    const activeShipments =
+      this.metrics && this.metrics.shipments
+        ? this.metrics.shipments
+        : this.getStatNumber('[data-target-section="shipments"] .stat-number');
     if (this.charts.status) {
       const baseLoading = Math.floor(activeShipments * 0.12);
       const baseStopped = Math.floor(activeShipments * 0.06);
@@ -336,9 +447,30 @@ class SompoApp {
     }
     if (this.charts.alerts) {
       const regions = this.charts.alerts.data.labels || ['SP', 'RJ', 'MG'];
-      const regData = regions.map(
-        (_, i) => Math.floor(3 / regions.length) + (i < 3 % regions.length ? 1 : 0)
-      );
+      const totalAlerts = this.metrics && this.metrics.alerts ? this.metrics.alerts : 0;
+      // Prefer proportional scaling from demo dataset when available
+      let baseCounts = [];
+      if (this.demoData && Array.isArray(this.demoData.alerts) && this.demoData.alerts.length) {
+        baseCounts = this.countAlertsByRegion(regions);
+      }
+      const sumBase = baseCounts.reduce((a, b) => a + b, 0);
+      let regData;
+      if (sumBase > 0 && totalAlerts > 0) {
+        // Scale base distribution to match totalAlerts
+        const scale = totalAlerts / sumBase;
+        const floats = baseCounts.map(v => v * scale);
+        // Round while preserving sum
+        regData = floats.map(v => Math.floor(v));
+        let remaining = totalAlerts - regData.reduce((a, b) => a + b, 0);
+        for (let i = 0; i < regData.length && remaining > 0; i++) {
+          regData[i] += 1;
+          remaining--;
+        }
+      } else {
+        // Even split fallback
+        const base = Math.floor(totalAlerts / regions.length);
+        regData = regions.map((_, i) => base + (i < totalAlerts % regions.length ? 1 : 0));
+      }
       this.charts.alerts.data.datasets[0].data = regData;
       this.charts.alerts.update('none');
     }
