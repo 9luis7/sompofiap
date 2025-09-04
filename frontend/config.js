@@ -81,6 +81,73 @@ const CONFIG = {
     GPS_UPDATE_INTERVAL: 15000, // 15 segundos
   },
 
+  // Modo de demonstração (controle de cadência e autoplay)
+  DEMO: {
+    ENABLED: true,
+    SHIPMENTS_MIN_MS: 2500,
+    SHIPMENTS_MAX_MS: 5000,
+    ALERTS_MIN_MS: 3500,
+    ALERTS_MAX_MS: 6500,
+    SECURITY_MIN_MS: 4500,
+    SECURITY_MAX_MS: 8000,
+    KM_INTERVAL_MS: 1000,
+    AUTOPLAY: true,
+  },
+
+  // Guided Tour (roteiro de apresentação)
+  TOUR: {
+    ENABLED: true,
+    AUTOSTART: true, // primeira sessão
+    STEPS: [
+      {
+        selector: '.stats-grid',
+        title: 'Visão Geral em Tempo Real',
+        body:
+          'Métricas vivas e correlacionadas: cargas, alertas, km e taxa de segurança se atualizam de forma independente.',
+      },
+      {
+        selector: '#chart-status',
+        title: 'Status das Cargas',
+        body:
+          'Distribuição entre em trânsito, carregando e paradas. Clique em um setor para filtrar e abrir detalhes.',
+        requireAction: 'click',
+        doneWhenSelector: '#status-details',
+      },
+      {
+        selector: '#chart-alerts',
+        title: 'Alertas por Região',
+        body:
+          'Barra por estado/região com contagem dinâmica de alertas críticos. Clique em uma barra para ver detalhes.',
+        requireAction: 'click',
+        doneWhenSelector: '#alerts-details',
+      },
+      {
+        selector: '#map-mini',
+        title: 'Mapa Rápido',
+        body:
+          'Visualização instantânea para localizar anomalias e focar áreas de interesse com um clique.',
+      },
+      {
+        selector: '.nav-menu',
+        title: 'Navegação Intuitiva',
+        body:
+          'Acesse cargas, veículos, alertas e o mapa completo. A experiência é fluida para operação 24/7.',
+      },
+      {
+        selector: '[data-section="map"]',
+        title: 'Mapa Completo',
+        body:
+          'Abra o mapa para ver camadas de risco, rotas com destaque de trechos críticos e painel contextual.',
+      },
+      {
+        selector: '#map-full',
+        title: 'Rotas e Zonas de Risco',
+        body:
+          'Ao clicar numa carga, traçamos a rota com trechos seguros/arriscados e animação do veículo.',
+      },
+    ],
+  },
+
   // Configurações de paginação
   PAGINATION: {
     DEFAULT_PAGE: 1,
