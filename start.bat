@@ -110,23 +110,30 @@ echo ========================================
 echo   🎉 CONFIGURAÇÃO CONCLUÍDA!
 echo ========================================
 echo.
-echo Iniciando sistema em terminais separados...
+echo Iniciando sistema automaticamente...
 echo.
 
-:: Abrir terminal para o backend
-start "Sompo Backend" cmd /k "cd /d %~dp0 && title Sompo Backend && echo 🚀 Iniciando Backend... && npm run backend"
+:: Iniciar servidores diretamente
+echo Iniciando Backend...
+start "Sompo Backend" cmd /k "cd /d %~dp0 && title Sompo Backend && echo 🚀 Backend iniciando... && npm run backend"
 
-:: Aguardar um pouco para o backend inicializar
+timeout /t 5 /nobreak >nul
+
+echo Iniciando Frontend com React integrado...
+start "Sompo Frontend" cmd /k "cd /d %~dp0 && title Sompo Frontend && echo 🌐 Frontend + React iniciando... && npm run frontend"
+
 timeout /t 3 /nobreak >nul
 
-:: Abrir terminal para o frontend
-start "Sompo Frontend" cmd /k "cd /d %~dp0 && title Sompo Frontend && echo 🌐 Iniciando Frontend... && timeout /t 2 /nobreak >nul && npm run frontend"
+echo Abrindo navegador...
+start http://localhost:3000
 
 echo.
-echo ✅ Sistema iniciado com sucesso!
+echo ✨ Novas funcionalidades disponíveis:
+echo   - Botão de alternância de tema (claro/escuro)
+echo   - Efeitos glassmorphism aprimorados
+echo   - Animações e hover effects
+echo   - Interface mais moderna e responsiva
 echo.
-echo 📱 Frontend: http://localhost:3000
-echo 🔧 Backend: http://localhost:5000
-echo.
+echo Sistema totalmente operacional!
 echo Pressione qualquer tecla para fechar este terminal...
 pause >nul

@@ -8,6 +8,7 @@
     <!-- Meta tags para SEO -->
     <meta name="description" content="Sistema de monitoramento inteligente para Sompo Seguros" />
     <meta name="keywords" content="seguros, monitoramento, logística, tecnologia" />
+
     <meta name="author" content="Sompo Seguros" />
 
     <!-- Favicon -->
@@ -43,6 +44,7 @@
     <link rel="stylesheet" href="modern-styles.css?v=2" />
   </head>
   <body>
+
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
       <div class="loading-content">
@@ -75,13 +77,7 @@
         </div>
       </div>
 
-      <!-- Dark Mode Toggle -->
-      <div class="theme-toggle" id="login-theme-toggle">
-        <div class="theme-toggle-switch" id="login-theme-switch">
-          <i class="fas fa-sun icon sun"></i>
-          <i class="fas fa-moon icon moon"></i>
-        </div>
-      </div>
+      <!-- Dark Mode Toggle agora está na navbar -->
 
       <!-- Hero Section -->
       <div class="hero-section">
@@ -290,16 +286,33 @@
         </div>
 
         <div class="nav-actions">
-          <div class="user-menu">
+          <!-- Theme Toggle Button -->
+          <button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema">
+            <i class="fas fa-moon"></i>
+          </button>
+          
+          <div class="user-menu" id="user-menu">
             <div class="user-avatar">
               <i class="fas fa-user"></i>
             </div>
             <span class="user-name">Admin</span>
             <i class="fas fa-chevron-down"></i>
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="dropdown-item" id="profile-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Perfil</span>
+              </div>
+              <div class="dropdown-item" id="settings-item">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" id="logout-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair do Sistema</span>
+              </div>
+            </div>
           </div>
-          <button class="theme-toggle-btn" id="dashboard-theme-toggle">
-            <i class="fas fa-moon"></i>
-          </button>
         </div>
       </nav>
 
@@ -481,14 +494,380 @@
             <div class="chart-header">
               <h3>Mapa Interativo</h3>
             </div>
-            <div class="chart-content" style="min-height: 400px">
-              <div id="map-full" style="width: 100%; height: 380px; border-radius: 12px"></div>
-              <div id="map-shipments-panel" class="data-list" style="margin-top: 12px"></div>
+            <div class="chart-content map-container" style="min-height: 400px; position: relative">
+              <div id="map-full" style="width: 100%; height: 500px; border-radius: 12px"></div>
+              <div class="map-shipments-compact">
+                <div class="compact-header">
+                  <i class="fas fa-truck"></i>
+                  <span id="shipments-count">0 cargas</span>
+                  <button
+                    class="btn-icon compact-toggle"
+                    id="map-shipments-toggle"
+                    title="Ver cargas"
+                  >
+                    <i class="fas fa-list"></i>
+                  </button>
+                </div>
+                <div id="map-shipments-panel" class="compact-panel" style="display: none"></div>
+              </div>
             </div>
           </div>
         </section>
       </main>
     </div>
+
+    <!-- Roadmap Section (Hidden) -->
+    <div id="roadmap-section" class="roadmap-overlay" style="display: none">
+      <div class="roadmap-modal">
+        <div class="roadmap-header">
+          <h2>🚀 Roadmap SOMPO Monitoring</h2>
+          <button class="roadmap-close" id="roadmap-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="roadmap-content">
+          <div class="roadmap-section">
+            <h3>📊 Inteligência de Negócio</h3>
+            <ul>
+              <li>
+                <strong>Previsão de Riscos:</strong> Sistema inteligente que antecipa problemas
+                antes que aconteçam
+              </li>
+              <li>
+                <strong>Otimização de Rotas:</strong> Redução automática de custos e tempo de
+                entrega
+              </li>
+              <li><strong>Dashboard Executivo:</strong> Visão completa do negócio em tempo real</li>
+              <li>
+                <strong>Relatórios Automáticos:</strong> Documentação inteligente para tomada de
+                decisão
+              </li>
+            </ul>
+          </div>
+
+          <div class="roadmap-section">
+            <h3>🌐 Integração Empresarial</h3>
+            <ul>
+              <li>
+                <strong>Conexão com Sistemas:</strong> Integração perfeita com sistemas existentes
+                da empresa
+              </li>
+              <li>
+                <strong>Comunicação Instantânea:</strong> Alertas automáticos para equipes e
+                parceiros
+              </li>
+              <li>
+                <strong>App para Motoristas:</strong> Ferramenta móvel para operadores em campo
+              </li>
+              <li><strong>Monitoramento IoT:</strong> Conectividade com sensores e equipamentos</li>
+            </ul>
+          </div>
+
+          <div class="roadmap-section">
+            <h3>🔒 Segurança Corporativa</h3>
+            <ul>
+              <li>
+                <strong>Proteção Avançada:</strong> Segurança biométrica para acesso ao sistema
+              </li>
+              <li>
+                <strong>Compliance Total:</strong> Atendimento completo à LGPD e regulamentações
+              </li>
+              <li>
+                <strong>Dados Protegidos:</strong> Criptografia total de informações sensíveis
+              </li>
+              <li><strong>Backup Inteligente:</strong> Proteção contra perda de dados e falhas</li>
+            </ul>
+          </div>
+
+          <div class="roadmap-section">
+            <h3>⚡ Performance Empresarial</h3>
+            <ul>
+              <li>
+                <strong>Alta Disponibilidade:</strong> Sistema sempre funcionando, sem interrupções
+              </li>
+              <li>
+                <strong>Velocidade Otimizada:</strong> Resposta instantânea em todas as operações
+              </li>
+              <li>
+                <strong>Escalabilidade Automática:</strong> Crescimento do sistema conforme a
+                demanda
+              </li>
+              <li>
+                <strong>Eficiência Operacional:</strong> Redução de custos e aumento de
+                produtividade
+              </li>
+            </ul>
+          </div>
+
+          <div class="roadmap-section">
+            <h3>🎯 Inovação Operacional</h3>
+            <ul>
+              <li>
+                <strong>Zonas de Risco Inteligentes:</strong> Alertas automáticos baseados em
+                localização
+              </li>
+              <li>
+                <strong>Simulação de Cenários:</strong> Teste de estratégias antes da implementação
+              </li>
+              <li>
+                <strong>Suporte Automatizado:</strong> Assistência 24 horas sem intervenção humana
+              </li>
+              <li><strong>Verificação por Imagem:</strong> Controle de qualidade automatizado</li>
+            </ul>
+          </div>
+
+          <div class="roadmap-section">
+            <h3>📱 Experiência do Usuário</h3>
+            <ul>
+              <li>
+                <strong>Funcionamento Offline:</strong> Sistema operacional mesmo sem internet
+              </li>
+              <li>
+                <strong>Interface Personalizada:</strong> Adaptação automática às preferências do
+                usuário
+              </li>
+              <li>
+                <strong>Notificações Inteligentes:</strong> Alertas personalizados para cada perfil
+              </li>
+              <li><strong>Multi-dispositivo:</strong> Acesso completo em qualquer aparelho</li>
+            </ul>
+          </div>
+
+          <div class="roadmap-timeline">
+            <h3>🚀 Fases de Implementação</h3>
+            <div class="timeline-item">
+              <span class="timeline-phase">Fase 1</span>
+              <span class="timeline-desc"
+                >Inteligência Preditiva + Integração de Sistemas + Segurança Avançada</span
+              >
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-phase">Fase 2</span>
+              <span class="timeline-desc"
+                >Aplicativo Mobile + Conectividade IoT + Arquitetura Escalável</span
+              >
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-phase">Fase 3</span>
+              <span class="timeline-desc"
+                >Zonas Inteligentes + Suporte Automatizado + Funcionalidade Offline</span
+              >
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-phase">Fase 4</span>
+              <span class="timeline-desc"
+                >Verificação por Imagem + Simulação Avançada + Otimizações Finais</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section (Hidden) -->
+    <div id="faq-section" class="faq-overlay" style="display: none">
+      <div class="faq-modal">
+        <div class="faq-header">
+          <h2>❓ FAQ - Perguntas Frequentes</h2>
+          <button class="faq-close" id="faq-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="faq-content">
+          <div class="faq-category">
+            <h3>📊 Funcionalidades Atuais</h3>
+            <div class="faq-item">
+              <div class="faq-question">O que o sistema já consegue fazer hoje?</div>
+              <div class="faq-answer">
+                Monitoramento em tempo real de cargas, visualização de status (em trânsito,
+                preparação, parado), alertas por região, mapa interativo com localização de veículos
+                e painel executivo com métricas atualizadas.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Como funciona o dashboard em tempo real?</div>
+              <div class="faq-answer">
+                O dashboard mostra métricas vivas que se atualizam automaticamente: número de cargas
+                ativas, alertas críticos, quilômetros monitorados e taxa de segurança, tudo
+                sincronizado em tempo real.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">O sistema já tem tour guiado?</div>
+              <div class="faq-answer">
+                Sim, há um tour interativo que explica todas as funcionalidades do sistema, com
+                navegação automática entre seções e explicações detalhadas de cada recurso.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-category">
+            <h3>🗺️ Mapa e Localização</h3>
+            <div class="faq-item">
+              <div class="faq-question">Como funciona o mapa interativo?</div>
+              <div class="faq-answer">
+                O mapa mostra a localização de todas as cargas em tempo real, com marcadores
+                coloridos por status, zonas de risco destacadas e painel compacto para visualizar
+                cargas na área selecionada.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">É possível focar em uma carga específica no mapa?</div>
+              <div class="faq-answer">
+                Sim, clicando em qualquer carga no painel lateral, o mapa centraliza automaticamente
+                na localização daquela carga, facilitando o acompanhamento individual.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">O mapa mostra apenas o Brasil?</div>
+              <div class="faq-answer">
+                Sim, o mapa está otimizado para focar no território brasileiro, onde estão
+                concentradas as operações da SOMPO, proporcionando melhor visualização e
+                performance.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-category">
+            <h3>📈 Relatórios e Dados</h3>
+            <div class="faq-item">
+              <div class="faq-question">Que tipo de dados o sistema já coleta?</div>
+              <div class="faq-answer">
+                Status das cargas, localização GPS, alertas por região, métricas de performance,
+                histórico de movimentação e dados de telemetria dos veículos em tempo real.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Como são exibidos os alertas no sistema?</div>
+              <div class="faq-answer">
+                Os alertas aparecem em gráficos por região, com contadores dinâmicos e cores que
+                indicam a criticidade. Podem ser filtrados e visualizados em detalhes no mapa.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">O sistema já gera relatórios automáticos?</div>
+              <div class="faq-answer">
+                Atualmente o sistema coleta e exibe os dados em tempo real. A geração de relatórios
+                automáticos está prevista para as próximas semanas de desenvolvimento.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-category">
+            <h3>⚙️ Implementação Rápida</h3>
+            <div class="faq-item">
+              <div class="faq-question">Quanto tempo leva para ter o sistema funcionando?</div>
+              <div class="faq-answer">
+                O sistema base já está funcional. Para implementação completa com dados reais da
+                SOMPO, estimamos 2-4 semanas, incluindo integração com sistemas existentes.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">É possível começar com um piloto?</div>
+              <div class="faq-answer">
+                Sim, recomendamos começar com um grupo piloto de 10-20 cargas para validar o
+                funcionamento e ajustar configurações antes da implementação completa.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Que funcionalidades podem ser adicionadas rapidamente?</div>
+              <div class="faq-answer">
+                Integração com sistemas ERP, notificações por email/SMS, relatórios personalizados,
+                geofencing básico e dashboard customizado para diferentes perfis de usuário.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-category">
+            <h3>📱 Interface e Usabilidade</h3>
+            <div class="faq-item">
+              <div class="faq-question">A interface é intuitiva para operadores?</div>
+              <div class="faq-answer">
+                Sim, o design foi pensado para ser simples e direto. O tour guiado ajuda na
+                familiarização, e a navegação é intuitiva com ícones claros e cores padronizadas.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">O sistema funciona em tablets e smartphones?</div>
+              <div class="faq-answer">
+                Sim, a interface é totalmente responsiva e funciona perfeitamente em dispositivos
+                móveis, permitindo acesso em campo para operadores e gestores.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Há suporte a temas claro e escuro?</div>
+              <div class="faq-answer">
+                Sim, o sistema já possui alternância entre tema claro e escuro, proporcionando
+                melhor experiência visual em diferentes ambientes de trabalho.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-category">
+            <h3>🚀 Próximas Semanas</h3>
+            <div class="faq-item">
+              <div class="faq-question">O que será implementado nas próximas 2-3 semanas?</div>
+              <div class="faq-answer">
+                Integração com dados reais da SOMPO, sistema de notificações, relatórios executivos
+                automáticos, geofencing para zonas de risco e dashboard personalizado por perfil de
+                usuário.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">
+                Será possível conectar com sistemas existentes da SOMPO?
+              </div>
+              <div class="faq-answer">
+                Sim, nas próximas semanas implementaremos APIs para integração com sistemas ERP, WMS
+                e outros que a SOMPO já utiliza, garantindo sincronização de dados.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Haverá treinamento para a equipe?</div>
+              <div class="faq-answer">
+                Sim, ofereceremos treinamento presencial e online para todos os usuários, incluindo
+                materiais de apoio e sessões de dúvidas durante o período de adaptação.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-category">
+            <h3>📊 Benefícios Imediatos</h3>
+            <div class="faq-item">
+              <div class="faq-question">Que benefícios a SOMPO terá desde o primeiro dia?</div>
+              <div class="faq-answer">
+                Visibilidade completa das operações, redução de tempo para localizar cargas, alertas
+                automáticos de problemas e dashboard executivo para tomada de decisão em tempo real.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">Como isso melhora a comunicação interna?</div>
+              <div class="faq-answer">
+                Todos os departamentos terão acesso às mesmas informações em tempo real, eliminando
+                retrabalho e melhorando a coordenação entre equipes operacionais e administrativas.
+              </div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question">O sistema já está pronto para apresentação?</div>
+              <div class="faq-answer">
+                Sim, o sistema está completamente funcional para demonstração, com dados simulados
+                realistas que mostram todas as capacidades do monitoramento em tempo real.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Roadmap Button -->
+    <button id="roadmap-trigger" class="roadmap-trigger" title="Roadmap do Projeto">
+      <i class="fas fa-rocket"></i>
+    </button>
+
+    <!-- Hidden FAQ Button -->
+    <button id="faq-trigger" class="faq-trigger" title="FAQ - Perguntas Frequentes">
+      <i class="fas fa-question"></i>
+    </button>
 
     <!-- Scripts -->
     <script src="config.js?v=2"></script>
@@ -502,6 +881,96 @@
     ></script>
     <!-- Leaflet.heat plugin for heatmap layer -->
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    
+    <!-- React Integration -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
     <script src="modern-app.js?v=2"></script>
+    
+    <!-- React Components Integration -->
+    <script type="text/babel">
+      // Theme Toggle React Component - removido (usando botão HTML simples)
+
+      // Enhanced Status Card React Component
+      const StatusCardReact = ({ title, value, icon, color = 'blue' }) => {
+        const [isHovered, setIsHovered] = React.useState(false);
+
+        return React.createElement('div', {
+          className: `glass-card metric-card react-enhanced ${color}`,
+          style: {
+            padding: '1.5rem',
+            borderRadius: '16px',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'translateY(-8px) scale(1.05)' : 'translateY(0) scale(1)',
+            boxShadow: isHovered ? '0 20px 40px rgba(0,0,0,0.15)' : 'var(--glass-shadow)',
+            cursor: 'pointer'
+          },
+          onMouseEnter: () => setIsHovered(true),
+          onMouseLeave: () => setIsHovered(false)
+        }, [
+          React.createElement('div', {
+            key: 'content',
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' }
+          }, [
+            React.createElement('div', { key: 'info' }, [
+              React.createElement('h3', {
+                key: 'title',
+                style: { 
+                  color: 'var(--text-secondary)', 
+                  fontSize: '0.9rem', 
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }
+              }, title),
+              React.createElement('p', {
+                key: 'value',
+                style: { 
+                  color: 'var(--text-primary)', 
+                  fontSize: '2rem', 
+                  fontWeight: '700',
+                  margin: 0
+                }
+              }, value)
+            ]),
+            React.createElement('div', {
+              key: 'icon',
+              style: {
+                padding: '12px',
+                borderRadius: '12px',
+                background: `var(--${color}-500, #3b82f6)`,
+                color: 'white',
+                fontSize: '1.5rem',
+                transform: isHovered ? 'rotate(10deg) scale(1.1)' : 'rotate(0deg) scale(1)',
+                transition: 'all 0.3s ease'
+              }
+            }, icon)
+          ])
+        ]);
+      };
+
+      // Mount React components when DOM is ready
+      // Theme toggle agora é um botão HTML simples na navbar
+
+        // Add React-enhanced cards to existing metrics
+        const metricsContainer = document.querySelector('.metrics-grid, .dashboard-grid');
+        if (metricsContainer) {
+          const reactCard = document.createElement('div');
+          reactCard.className = 'metric-item react-demo';
+          metricsContainer.appendChild(reactCard);
+          
+          ReactDOM.render(
+            React.createElement(StatusCardReact, {
+              title: 'React Integrado',
+              value: '✨ Ativo',
+              icon: '⚛️',
+              color: 'blue'
+            }), 
+            reactCard
+          );
+        }
+      }, 2000);
+    </script>
   </body>
 </html>

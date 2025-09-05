@@ -4,7 +4,7 @@
   "description": "Sistema de Monitoramento de Cargas - Sompo Seguros",
   "main": "server.js",
   "scripts": {
-    "frontend": "npx http-server frontend -p 3000 -o",
+    "frontend": "npx http-server frontend -p 3000 -a 127.0.0.1 -o",
     "backend": "node backend/dist/server.js",
     "backend:dev": "nodemon backend/src/server.ts",
     "build:backend": "cd backend && npm run build",

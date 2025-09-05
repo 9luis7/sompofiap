@@ -16,6 +16,12 @@ class SompoApp {
     this.setupThemeToggle();
     this.simulateLoading();
     this.setupNavigation();
+    this.setupAnimations();
+    
+    // Setup user dropdown after a delay to ensure DOM is ready
+    setTimeout(() => {
+      this.setupUserDropdown();
+    }, 1000);
   }
 
   setupEventListeners() {
@@ -23,6 +29,115 @@ class SompoApp {
     const closeAllNavItems = () => {
       document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
     };
+
+    // Map shipments compact toggle
+    const mapShipmentsToggle = document.getElementById('map-shipments-toggle');
+    if (mapShipmentsToggle) {
+      mapShipmentsToggle.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const panel = document.getElementById('map-shipments-panel');
+        const isOpen = panel.style.display !== 'none';
+
+        if (isOpen) {
+          panel.style.display = 'none';
+          mapShipmentsToggle.classList.remove('active');
+        } else {
+          panel.style.display = 'block';
+          mapShipmentsToggle.classList.add('active');
+        }
+      });
+    }
+
+    // Close panel when clicking outside
+    document.addEventListener('click', e => {
+      const compactPanel = document.querySelector('.map-shipments-compact');
+      const toggle = document.getElementById('map-shipments-toggle');
+      const panel = document.getElementById('map-shipments-panel');
+
+      if (compactPanel && !compactPanel.contains(e.target) && panel.style.display !== 'none') {
+        panel.style.display = 'none';
+        toggle.classList.remove('active');
+      }
+    });
+
+    // Roadmap functionality
+    const roadmapTrigger = document.getElementById('roadmap-trigger');
+    const roadmapSection = document.getElementById('roadmap-section');
+    const roadmapClose = document.getElementById('roadmap-close');
+
+    if (roadmapTrigger && roadmapSection) {
+      roadmapTrigger.addEventListener('click', e => {
+        e.preventDefault();
+        roadmapSection.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    if (roadmapClose && roadmapSection) {
+      roadmapClose.addEventListener('click', e => {
+        e.preventDefault();
+        roadmapSection.style.display = 'none';
+        document.body.style.overflow = '';
+      });
+    }
+
+    // Close roadmap when clicking outside
+    if (roadmapSection) {
+      roadmapSection.addEventListener('click', e => {
+        if (e.target === roadmapSection) {
+          roadmapSection.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    // Close roadmap with Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && roadmapSection && roadmapSection.style.display === 'flex') {
+        roadmapSection.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
+
+    // FAQ functionality
+    const faqTrigger = document.getElementById('faq-trigger');
+    const faqSection = document.getElementById('faq-section');
+    const faqClose = document.getElementById('faq-close');
+
+    if (faqTrigger && faqSection) {
+      faqTrigger.addEventListener('click', e => {
+        e.preventDefault();
+        faqSection.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    if (faqClose && faqSection) {
+      faqClose.addEventListener('click', e => {
+        e.preventDefault();
+        faqSection.style.display = 'none';
+        document.body.style.overflow = '';
+      });
+    }
+
+    // Close FAQ when clicking outside
+    if (faqSection) {
+      faqSection.addEventListener('click', e => {
+        if (e.target === faqSection) {
+          faqSection.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    // Close FAQ with Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && faqSection && faqSection.style.display === 'flex') {
+        faqSection.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
 
     // Login form
     const loginForm = document.getElementById('login-form');
@@ -33,20 +148,13 @@ class SompoApp {
       });
     }
 
-    // Botão de login (defensivo caso o onsubmit não dispare)
-    const loginButton = document.querySelector('.btn-login');
-    if (loginButton) {
-      loginButton.addEventListener('click', e => {
-        e.preventDefault();
-        this.handleLogin();
-      });
-    }
+    // Botão de login - removido event listener duplicado (já tem onclick no HTML)
 
-    // Theme toggles
-    const themeToggles = document.querySelectorAll('[id*="theme-toggle"]');
-    themeToggles.forEach(toggle => {
-      toggle.addEventListener('click', () => this.toggleTheme());
-    });
+    // Theme toggle button
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+    }
 
     // Navigation links
     const navLinks = document.querySelectorAll('.nav-link');
@@ -113,6 +221,8 @@ class SompoApp {
     if (savedTheme) {
       this.isDarkMode = savedTheme === 'dark';
       this.applyTheme();
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      this.setTheme('dark');
     }
   }
 
@@ -120,6 +230,128 @@ class SompoApp {
     // Initialize navigation state
     this.updateNavigationState();
   }
+
+  setupAnimations() {
+    // Add enhanced hover effects to existing cards
+    setTimeout(() => {
+      // Add glassmorphism to existing cards
+      document.querySelectorAll('.card, .metric-card, .chart-card').forEach(card => {
+        card.classList.add('glass-card');
+      });
+
+      // Add hover effects to buttons
+      document.querySelectorAll('button, .btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+          btn.style.transform = 'translateY(-2px)';
+          btn.style.transition = 'all 0.3s ease';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.transform = 'translateY(0)';
+        });
+      });
+
+      // Add floating animation to some elements
+      document.querySelectorAll('.logo, .icon').forEach(el => {
+        el.classList.add('float-animation');
+      });
+
+          // Add glow effect to primary elements
+    document.querySelectorAll('.primary, .btn-primary').forEach(el => {
+      el.classList.add('glow-animation');
+    });
+
+    // Setup logout button (removed - handled in setupUserDropdown)
+  }, 1000);
+}
+
+handleLogout() {
+  // Show confirmation dialog
+  if (confirm('Tem certeza que deseja sair do sistema?')) {
+    // Clear user data
+    this.currentUser = null;
+    localStorage.removeItem('sompo-auth-token');
+    localStorage.removeItem('sompo-user-data');
+    
+    // Show logout notification
+    this.showNotification('Logout realizado com sucesso!', 'success');
+    
+    // Redirect to login after a short delay
+    setTimeout(() => {
+      this.showScreen('login');
+    }, 1500);
+  }
+}
+
+showScreen(screenName) {
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active');
+  });
+  
+  // Show target screen
+  const targetScreen = document.getElementById(`${screenName}-screen`);
+  if (targetScreen) {
+    targetScreen.classList.add('active');
+  }
+}
+
+setupUserDropdown() {
+  const userMenu = document.getElementById('user-menu');
+  const dropdown = document.getElementById('user-dropdown');
+  const logoutItem = document.getElementById('logout-item');
+  
+  // Setup user dropdown when elements exist
+  
+  if (!userMenu || !dropdown || !logoutItem) {
+    // Elements not found; dropdown won't be initialized on this view
+    return;
+  }
+  
+  // Toggle dropdown
+  userMenu.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Toggle dropdown visibility
+    userMenu.classList.toggle('active');
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!userMenu.contains(e.target)) {
+      userMenu.classList.remove('active');
+    }
+  });
+  
+  // Handle logout
+  logoutItem.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Logout action from dropdown
+    userMenu.classList.remove('active');
+    this.handleLogout();
+  });
+  
+  // Handle other dropdown items
+  const profileItem = document.getElementById('profile-item');
+  const settingsItem = document.getElementById('settings-item');
+  
+  if (profileItem) {
+    profileItem.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      userMenu.classList.remove('active');
+      this.showNotification('Funcionalidade de perfil em desenvolvimento', 'info');
+    });
+  }
+  
+  if (settingsItem) {
+    settingsItem.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      userMenu.classList.remove('active');
+      this.showNotification('Funcionalidade de configurações em desenvolvimento', 'info');
+    });
+  }
+}
 
   simulateLoading() {
     const loadingScreen = document.getElementById('loading-screen');
@@ -259,6 +491,13 @@ class SompoApp {
 
       // Initialize dashboard
       this.initializeDashboard();
+      // Autostart do tour após login, apenas na primeira vez
+      const cfg = (window.CONFIG && window.CONFIG.TOUR) || {};
+      const seen = sessionStorage.getItem('sompo-tour-seen');
+      if (cfg.ENABLED && cfg.AUTOSTART && !seen) {
+        setTimeout(() => this.startTour(), 600);
+        sessionStorage.setItem('sompo-tour-seen', '1');
+      }
     }
   }
 
@@ -278,8 +517,9 @@ class SompoApp {
     // Setup real-time updates
     this.setupRealTimeUpdates();
 
-    // Prepare dataset, charts and mini map
+    // Prepare dataset, then sync metrics/charts to dataset and init mini map
     this.generateDemoDataset();
+    this.syncMetricsToDataset();
     this.initializeCharts();
     this.initMiniMap();
 
@@ -315,11 +555,20 @@ class SompoApp {
       }
     });
 
-    // Start independent, staggered update loops for each metric
-    this.startShipmentsLoop();
-    this.startAlertsLoop();
-    this.startSecurityLoop();
-    this.startKmLoop();
+    // Start independent, staggered update loops for each metric (natural, não simultâneo)
+    setTimeout(() => this.startShipmentsLoop(), this.getStaggerDelay('shipments'));
+    setTimeout(() => this.startAlertsLoop(), this.getStaggerDelay('alerts'));
+    setTimeout(() => this.startSecurityLoop(), this.getStaggerDelay('security'));
+    setTimeout(() => this.startKmLoop(), this.getStaggerDelay('km'));
+  }
+
+  getStaggerDelay(name) {
+    const cfg = (window.CONFIG && window.CONFIG.DEMO) || {};
+    const min = cfg.STAGGER_MIN_MS || 300;
+    const max = cfg.STAGGER_MAX_MS || 1800;
+    const base = min + Math.random() * Math.max(0, max - min);
+    const multipliers = { shipments: 1.0, alerts: 1.2, security: 1.5, km: 0.8 };
+    return Math.round(base * (multipliers[name] || 1));
   }
 
   initializeMetricsFromUI() {
@@ -339,7 +588,7 @@ class SompoApp {
       security: getNumber('[data-metric="security"]') || 99.5,
     };
 
-    // Baseline distribution for charts derived from shipments
+    // Baseline distribution
     this.metricsDist = this.computeStatusDistribution(this.metrics.shipments);
   }
 
@@ -349,6 +598,49 @@ class SompoApp {
     const stopped = Math.floor(totalShipments * 0.06);
     const inTransit = Math.max(0, totalShipments - loading - stopped);
     return { inTransit, loading, stopped };
+  }
+
+  // Count shipment statuses from current dataset
+  countStatusFromDataset() {
+    const counts = { inTransit: 0, loading: 0, stopped: 0 };
+    if (this.demoData && Array.isArray(this.demoData.shipments)) {
+      this.demoData.shipments.forEach(s => {
+        if (s.status === 'in_transit') counts.inTransit += 1;
+        else if (s.status === 'loading') counts.loading += 1;
+        else counts.stopped += 1;
+      });
+    }
+    return counts;
+  }
+
+  // Active shipments are those not stopped
+  getActiveShipments() {
+    return (this.demoData.shipments || []).filter(s => s.status !== 'stopped');
+  }
+
+  // Align dashboard metrics to dataset values (keeps numbers coherent with lists)
+  syncMetricsToDataset() {
+    const activeCount = this.getActiveShipments().length;
+    const alertsCount = (this.demoData.alerts || []).length;
+    const status = this.countStatusFromDataset();
+
+    this.metrics.shipments = activeCount;
+    this.animateMetricTo('shipments', activeCount);
+
+    this.metrics.alerts = alertsCount;
+    this.animateMetricTo('alerts', alertsCount);
+
+    // Derive security from current alerts/shipments ratio
+    const ratio = activeCount > 0 ? alertsCount / activeCount : 0;
+    const security = Math.max(96.5, Math.min(99.9, 100 - ratio * 120));
+    this.metrics.security = security;
+    this.animateMetricTo('security', security);
+
+    // Update internal distribution for charts and km
+    this.metricsDist = { inTransit: status.inTransit, loading: status.loading, stopped: status.stopped };
+
+    // Refresh charts to reflect exact dataset
+    this.updateChartsWithCurrentStats();
   }
 
   // Animates metric number changes with formatting per-metric
@@ -391,10 +683,12 @@ class SompoApp {
         this._shipmentsTimer = setTimeout(tick, 1000);
         return;
       }
-      const drift = Math.floor(Math.random() * 180 - 90); // -90..+90
-      const target = Math.max(500, Math.round(this.metrics.shipments + drift));
+      const base = this.getActiveShipments().length;
+      const jitter = Math.round((Math.random() - 0.5) * 6); // small +-3 jitter
+      const target = Math.max(0, base + jitter);
       this.metrics.shipments = target;
-      this.metricsDist = this.computeStatusDistribution(this.metrics.shipments);
+      const status = this.countStatusFromDataset();
+      this.metricsDist = { inTransit: status.inTransit, loading: status.loading, stopped: status.stopped };
       this.animateMetricTo('shipments', this.metrics.shipments);
       this.updateChartsWithCurrentStats();
       const cfg = (window.CONFIG && window.CONFIG.DEMO) || {};
@@ -412,14 +706,10 @@ class SompoApp {
         this._alertsTimer = setTimeout(tick, 1000);
         return;
       }
-      // Alerts rate linked to shipments and security (kept > 0 to avoid empty chart)
-      const baseRate = 0.005; // 0.5%
-      const securityPenalty = Math.max(0, (100 - this.metrics.security) / 100) * 0.02; // up to +2%
-      const noise = (Math.random() - 0.5) * 0.001; // +-0.1%
-      let rate = baseRate + securityPenalty + noise;
-      rate = Math.max(0.0005, Math.min(0.008, rate)); // clamp to ~0.05%-0.8%
-      const target = Math.round(this.metrics.shipments * rate);
-      this.metrics.alerts = Math.max(0, target);
+      const base = (this.demoData.alerts || []).length;
+      const jitter = Math.round((Math.random() - 0.5) * 4); // small +-2 jitter
+      const target = Math.max(0, base + jitter);
+      this.metrics.alerts = target;
       this.animateMetricTo('alerts', this.metrics.alerts);
       // keep chart bars subtly refreshed
       this.updateChartsWithCurrentStats();
@@ -460,7 +750,7 @@ class SompoApp {
         this._kmTimer = setTimeout(tick, 1000);
         return;
       }
-      const inTransit = this.metricsDist.inTransit || Math.round(this.metrics.shipments * 0.82);
+      const inTransit = this.metricsDist.inTransit || this.countStatusFromDataset().inTransit;
       const perShipmentPerSec = 0.0008; // km per shipment per second (synthetic)
       const jitter = 0.6 + Math.random() * 0.8; // 0.6..1.4x
       const delta = inTransit * perShipmentPerSec * jitter;
@@ -474,14 +764,12 @@ class SompoApp {
   }
 
   updateChartsWithCurrentStats() {
-    const activeShipments =
-      this.metrics && this.metrics.shipments
-        ? this.metrics.shipments
-        : this.getStatNumber('[data-target-section="shipments"] .stat-number');
+    // Use precise counts from dataset
+    const status = this.countStatusFromDataset();
+    const inTransit = status.inTransit;
+    const baseLoading = status.loading;
+    const baseStopped = status.stopped;
     if (this.charts.status) {
-      const baseLoading = Math.floor(activeShipments * 0.12);
-      const baseStopped = Math.floor(activeShipments * 0.06);
-      const inTransit = Math.max(0, activeShipments - baseLoading - baseStopped);
       this.charts.status.data.datasets[0].data = [inTransit, baseLoading, baseStopped];
       this.charts.status.update('none');
     }
@@ -542,7 +830,7 @@ class SompoApp {
         this.charts.status = new Chart(statusCtx, {
           type: 'doughnut',
           data: {
-            labels: ['Em trânsito', 'Carregando', 'Parado'],
+            labels: ['Em trânsito', 'Preparação', 'Parado'],
             datasets: [
               {
                 data: [inTransit, baseLoading, baseStopped],
@@ -553,6 +841,15 @@ class SompoApp {
           },
           options: {
             responsive: true,
+            onClick: (evt, els) => {
+              if (!els.length) {
+                return;
+              }
+              const idx = els[0].index; // 0=inTransit,1=loading,2=stopped
+              const key = idx === 0 ? 'in_transit' : idx === 1 ? 'loading' : 'stopped';
+              this.highlightShipmentsOnMap(key);
+              this.renderStatusDetails(key);
+            },
             plugins: {
               legend: {
                 position: 'bottom',
@@ -586,7 +883,7 @@ class SompoApp {
                     </div>
                     <div class="item">
                       <span class="swatch" style="background:#f59e0b"></span>
-                      Carregando (${baseLoading})
+                      Preparação (${baseLoading})
                     </div>
                     <div class="item">
                       <span class="swatch" style="background:#94a3b8"></span>
@@ -670,18 +967,7 @@ class SompoApp {
         alertsCtx.replaceWith(wrap);
       }
     }
-    // Click handler for status chart
-    if (this.charts.status) {
-      this.charts.status.options.onClick = (evt, els) => {
-        if (!els.length) {
-          return;
-        }
-        const idx = els[0].index; // 0=inTransit,1=loading,2=stopped
-        const key = idx === 0 ? 'in_transit' : idx === 1 ? 'loading' : 'stopped';
-        this.highlightShipmentsOnMap(key);
-        this.renderStatusDetails(key);
-      };
-    }
+    // Click handler já configurado diretamente no Chart acima
   }
 
   getStatNumber(selector) {
@@ -1390,6 +1676,14 @@ class SompoApp {
       this._selectedMarker && this._selectedMarker.shipment
         ? this._selectedMarker.shipment.id
         : null;
+
+    // Update count display
+    const countDisplay = document.getElementById('shipments-count');
+    if (countDisplay) {
+      const count = top.length;
+      countDisplay.textContent = `${count} carga${count !== 1 ? 's' : ''}`;
+    }
+
     panel.innerHTML = top
       .map(
         s => `
@@ -1596,7 +1890,7 @@ class SompoApp {
     if (!el) {
       return;
     }
-    const mapStatus = { in_transit: 'Em trânsito', loading: 'Carregando', stopped: 'Parado' };
+    const mapStatus = { in_transit: 'Em trânsito', loading: 'Preparação', stopped: 'Parado' };
     const items = this.demoData.shipments.filter(s => s.status === statusKey).slice(0, 6);
     const list = items.map(s => `<div>• ${s.shipmentNumber} — ${s.address}</div>`).join('');
     el.innerHTML = `<div class="badge">${mapStatus[statusKey] || statusKey}</div>${list || '<em>Sem itens</em>'}`;
@@ -1690,7 +1984,10 @@ class SompoApp {
     if (!list) {
       return;
     }
-    const items = this.demoData.shipments.slice(0, 30);
+    // Mostrar somente cargas ativas (exclui paradas) e atualizar contagem
+    const items = this.getActiveShipments().slice(0, 60);
+    this.metrics.shipments = this.getActiveShipments().length;
+    this.animateMetricTo('shipments', this.metrics.shipments);
     list.innerHTML = items
       .map(
         s => `
@@ -1768,7 +2065,10 @@ class SompoApp {
     if (!list) {
       return;
     }
-    const items = this.demoData.alerts.slice(0, 30);
+    // Lista dinâmica: todos os alertas atuais e sincroniza contagem do dashboard
+    const items = (this.demoData.alerts || []).slice(0, 100);
+    this.metrics.alerts = (this.demoData.alerts || []).length;
+    this.animateMetricTo('alerts', this.metrics.alerts);
     list.innerHTML = items
       .map(
         a => `
@@ -1816,9 +2116,15 @@ class SompoApp {
     localStorage.setItem('sompo-theme', this.isDarkMode ? 'dark' : 'light');
   }
 
+  setTheme(theme) {
+    this.isDarkMode = theme === 'dark';
+    this.applyTheme();
+    localStorage.setItem('sompo-theme', theme);
+  }
+
   applyTheme() {
     const body = document.body;
-    const themeIcon = document.querySelector('.theme-toggle-btn i');
+    const themeIcon = document.querySelector('#theme-toggle-btn i');
 
     if (this.isDarkMode) {
       body.setAttribute('data-theme', 'dark');
@@ -1831,6 +2137,12 @@ class SompoApp {
         themeIcon.className = 'fas fa-moon';
       }
     }
+
+    // Update meta theme-color
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', this.isDarkMode ? '#0f172a' : '#3b82f6');
+    }
   }
 
   showNotification(message, type = 'info') {
@@ -1842,9 +2154,6 @@ class SompoApp {
                 <i class="fas fa-${this.getNotificationIcon(type)}"></i>
                 <span>${message}</span>
             </div>
-            <button class="notification-close">
-                <i class="fas fa-times"></i>
-            </button>
         `;
 
     // Add to page
@@ -1855,16 +2164,20 @@ class SompoApp {
       notification.classList.add('show');
     }, 100);
 
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
+    // Auto-hide after 3 seconds (reduced from 5)
+    const autoHideTimer = setTimeout(() => {
       this.hideNotification(notification);
-    }, 5000);
+    }, 3000);
 
-    // Close button
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.addEventListener('click', () => {
+    // Click anywhere on notification to close immediately
+    notification.addEventListener('click', () => {
+      clearTimeout(autoHideTimer);
       this.hideNotification(notification);
     });
+
+    // Add hover effect to indicate it's clickable
+    notification.style.cursor = 'pointer';
+    notification.title = 'Clique para fechar';
   }
 
   hideNotification(notification) {
@@ -1905,12 +2218,21 @@ class SompoApp {
       if (actions && !actions.querySelector('.tour-btn')) {
         const btn = document.createElement('button');
         btn.className = 'btn-icon tour-btn';
-        btn.title = 'Iniciar tour (Ctrl+T)';
+        btn.title = 'Reiniciar tour (Ctrl+T)';
         btn.innerHTML = '<i class="fas fa-route"></i>';
         btn.addEventListener('click', () => this.startTour());
         actions.insertBefore(btn, actions.firstChild);
       }
-    } catch (_) {}
+    } catch (_) {
+      void 0;
+    }
+    // Reiniciar tour via atalho
+    document.addEventListener('keydown', e => {
+      if ((e.key === 't' || e.key === 'T') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.startTour();
+      }
+    });
   }
 
   startTour() {
@@ -1955,7 +2277,7 @@ class SompoApp {
 
     const renderDots = () => {
       stepsEl.innerHTML = steps
-        .map((_, i) => `<span class="dot ${i === state.idx ? 'active' : ''}"></span>`) 
+        .map((_, i) => `<span class="dot ${i === state.idx ? 'active' : ''}"></span>`)
         .join('');
     };
 
@@ -1966,10 +2288,23 @@ class SompoApp {
       highlight.style.top = rect.top + 'px';
       highlight.style.width = rect.width + 'px';
       highlight.style.height = rect.height + 'px';
-      // Popover below or above
-      const prefersAbove = rect.bottom + 200 > window.innerHeight;
-      pop.style.left = Math.max(16, rect.left) + 'px';
-      pop.style.top = (prefersAbove ? rect.top - 160 : rect.bottom + 12) + 'px';
+      // Popover positioning - better placement
+      const prefersAbove = rect.bottom + 220 > window.innerHeight;
+      const prefersRight = rect.left + 400 < window.innerWidth;
+      
+      if (prefersRight && rect.right + 320 < window.innerWidth) {
+        // Position to the right
+        pop.style.left = (rect.right + 20) + 'px';
+        pop.style.top = Math.max(20, rect.top - 50) + 'px';
+      } else if (rect.left - 320 > 0) {
+        // Position to the left
+        pop.style.left = (rect.left - 320) + 'px';
+        pop.style.top = Math.max(20, rect.top - 50) + 'px';
+      } else {
+        // Default positioning (above or below)
+        pop.style.left = Math.max(20, Math.min(rect.left, window.innerWidth - 400)) + 'px';
+        pop.style.top = (prefersAbove ? rect.top - 180 : rect.bottom + 20) + 'px';
+      }
     };
 
     const ensureVisible = target => {
@@ -1992,6 +2327,13 @@ class SompoApp {
     const showStep = idx => {
       state.idx = Math.max(0, Math.min(steps.length - 1, idx));
       const step = steps[state.idx];
+      if (step && step.navigateTo) {
+        try {
+          this.navigateToSection(step.navigateTo);
+        } catch (_) {
+          void 0;
+        }
+      }
       const target = document.querySelector(step.selector);
       titleEl.textContent = step.title || '';
       bodyEl.textContent = step.body || '';
@@ -2010,7 +2352,7 @@ class SompoApp {
       // Clean any previous guards
       overlay.querySelectorAll('[data-tour-guard]').forEach(el => el.remove());
       if (step.requireAction && step.requireAction === 'click' && target) {
-        nextBtn.disabled = true;
+        nextBtn.disabled = false; // Sempre habilitado para avanço manual
         // Visual hint overlay over the target to indicate click
         const hint = document.createElement('div');
         hint.setAttribute('data-tour-guard', '');
@@ -2019,83 +2361,106 @@ class SompoApp {
         const rect = target.getBoundingClientRect();
         hint.style.left = rect.left + rect.width / 2 - 16 + 'px';
         hint.style.top = rect.top + rect.height / 2 - 16 + 'px';
-        // Click-through hole to capture user click even com overlay ativo
-        const hole = document.createElement('div');
-        hole.setAttribute('data-tour-guard', '');
-        hole.className = 'tour-hole';
-        hole.style.left = rect.left + 'px';
-        hole.style.top = rect.top + 'px';
-        hole.style.width = rect.width + 'px';
-        hole.style.height = rect.height + 'px';
-        hole.addEventListener('click', e => {
-          // Propagate a synthetic pointer event to the underlying canvas (Chart.js)
-          try {
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
-            const evt = new MouseEvent('click', {
-              bubbles: true,
-              cancelable: true,
-              view: window,
-              clientX: cx,
-              clientY: cy,
-            });
-            target.dispatchEvent(evt);
-          } catch (_) {
-            try { target.click(); } catch (__) {}
-          }
-          setTimeout(completeCheck, 120);
-          e.stopPropagation();
-          e.preventDefault();
-        });
-        overlay.appendChild(hole);
-        // Listener to detect completion
-        const completeCheck = () => {
-          const doneSel = step.doneWhenSelector;
-          if (doneSel) {
-            const doneEl = document.querySelector(doneSel);
-            if (doneEl && doneEl.innerHTML && doneEl.innerHTML.trim().length > 0) {
-              nextBtn.disabled = false;
-              hint.remove();
-              // Small narrative addendum
-              bodyEl.textContent = (step.body || '') + ' Agora você está vendo os detalhes.';
-              // Auto-advance after short delay
-              setTimeout(() => { if (!nextBtn.disabled) nextBtn.click(); }, 900);
-            }
-          }
-        };
-        // Hook generic click and chart updates
-        target.addEventListener('click', () => setTimeout(completeCheck, 100), { once: true });
-        // Also poll as fallback if chart triggers async updates
-        let tries = 0;
-        const poll = setInterval(() => {
-          completeCheck();
-          tries++;
-          if (!nextBtn.disabled || tries > 40) {
-            clearInterval(poll);
-          }
-        }, 150);
+        // Botão Próximo sempre habilitado para avanço manual
       }
     };
 
-    q('.tour-next').addEventListener('click', () => {
+    const goNext = () => {
       if (state.idx < steps.length - 1) {
         showStep(state.idx + 1);
       } else {
         cleanup();
       }
-    });
-    q('.tour-prev').addEventListener('click', () => showStep(state.idx - 1));
-    q('.tour-close').addEventListener('click', () => cleanup());
-    // Não fechar ao clicar fora; navegação fica travada até concluir ou fechar no X
+    };
+    const goPrev = () => showStep(state.idx - 1);
+    q('.tour-next').addEventListener('click', goNext);
+    q('.tour-prev').addEventListener('click', goPrev);
+    const hardLock = !!(window.CONFIG && window.CONFIG.TOUR && window.CONFIG.TOUR.HARD_LOCK);
+    const closeBtn = q('.tour-close');
+    if (closeBtn) {
+      if (hardLock) {
+        closeBtn.style.display = 'none';
+      } else {
+        closeBtn.addEventListener('click', () => cleanup());
+      }
+    }
+    // Não fechar ao clicar fora; pode travar a navegação se HARD_LOCK estiver ativo
 
     const onResize = () => showStep(state.idx);
+    // Navegação por teclado e scroll do mouse
+    const onKey = ev => {
+      if (ev.key === 'ArrowRight' || ev.key === 'PageDown') {
+        ev.preventDefault();
+        goNext();
+      } else if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') {
+        ev.preventDefault();
+        goPrev();
+      } else if (ev.key === 'Escape') {
+        ev.preventDefault();
+        cleanup();
+      }
+    };
+    const onWheel = ev => {
+      if (Math.abs(ev.deltaY) < 8) return;
+      if (ev.deltaY > 0) {
+        goNext();
+      } else {
+        goPrev();
+      }
+      ev.preventDefault();
+    };
     window.addEventListener('resize', onResize);
+    window.addEventListener('keydown', onKey, { capture: true });
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
 
-    const cleanup = () => {
+    let cleanup = () => {
       window.removeEventListener('resize', onResize);
-      try { document.body.removeChild(overlay); } catch (_) {}
+      window.removeEventListener('keydown', onKey, { capture: true });
+      window.removeEventListener('wheel', onWheel, { capture: true });
+      try {
+        document.body.removeChild(overlay);
+      } catch (_) {
+        void 0;
+      }
       document.body.style.overflow = prevOverflow || '';
     };
+
+    // Se hard lock estiver ativo, bloquear interações fora do overlay
+    if (hardLock) {
+      const blockOutside = ev => {
+        // Permitir cliques em elementos do tour e no gráfico ativo
+        const isTourElement =
+          overlay.contains(ev.target) ||
+          ev.target.hasAttribute('data-tour-guard') ||
+          ev.target.closest('[data-tour-guard]');
+
+        // Permitir cliques no gráfico Chart.js (canvas) durante o tour
+        const isChartElement =
+          ev.target.tagName === 'CANVAS' &&
+          (ev.target.closest('#chart-status') || ev.target.closest('#chart-alerts'));
+
+        if (!isTourElement && !isChartElement) {
+          ev.stopPropagation();
+          ev.preventDefault();
+        }
+      };
+      const blockKeys = ev => {
+        const allowed = ['Enter', ' ', 'ArrowLeft', 'ArrowRight'];
+        if (!allowed.includes(ev.key)) {
+          ev.stopPropagation();
+          ev.preventDefault();
+        }
+      };
+      document.addEventListener('click', blockOutside, true);
+      document.addEventListener('keydown', blockKeys, true);
+      const prevCleanup = cleanup;
+      // garantir remoção dos bloqueios
+      cleanup = () => {
+        document.removeEventListener('click', blockOutside, true);
+        document.removeEventListener('keydown', blockKeys, true);
+        prevCleanup();
+      };
+    }
 
     showStep(0);
   }
@@ -2105,33 +2470,62 @@ class SompoApp {
 const notificationStyles = `
     .notification {
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
         background: var(--card-background);
         backdrop-filter: var(--glass-blur);
         border: 1px solid var(--border-color);
         border-radius: var(--radius);
-        padding: 1rem 1.5rem;
+        padding: 0.75rem 1rem;
         box-shadow: var(--shadow-lg);
-        z-index: 9999;
-        transform: translateX(400px);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        max-width: 400px;
+        z-index: 10001;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 350px;
+        min-width: 250px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
     }
     
     .notification.show {
-        transform: translateX(0);
+        transform: translateX(-50%) translateY(0);
+    }
+    
+    .notification:hover {
+        transform: translateX(-50%) translateY(-2px);
+        box-shadow: 0 8px 25px rgb(0 0 0 / 15%);
     }
     
     .notification-content {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        justify-content: center;
+        gap: 0.5rem;
         color: var(--text-primary);
+        font-size: 0.9rem;
+        font-weight: 500;
     }
     
     .notification-content i {
-        font-size: 1.2rem;
+        font-size: 1rem;
+    }
+    
+    .notification-success {
+        border-left: 4px solid var(--success-color);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, var(--card-background) 100%);
+    }
+    .notification-error {
+        border-left: 4px solid var(--danger-color);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--card-background) 100%);
+    }
+    .notification-warning {
+        border-left: 4px solid var(--warning-color);
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, var(--card-background) 100%);
+    }
+    .notification-info {
+        border-left: 4px solid var(--primary-color);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, var(--card-background) 100%);
     }
     
     .notification-success .notification-content i { color: var(--success-color); }
@@ -2139,29 +2533,22 @@ const notificationStyles = `
     .notification-warning .notification-content i { color: var(--warning-color); }
     .notification-info .notification-content i { color: var(--primary-color); }
     
-    .notification-close {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-        padding: 0.25rem;
-        border-radius: 50%;
-        transition: var(--transition);
-    }
-    
-    .notification-close:hover {
-        background: rgba(0, 0, 0, 0.05);
-        color: var(--text-primary);
+    @keyframes slideInDown {
+        from {
+            transform: translateX(-50%) translateY(-100px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
     }
 
     /* Tour styles */
     .tour-overlay{position:fixed;inset:0;z-index:9998;pointer-events:auto}
     .tour-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
     .tour-highlight{position:absolute;border:2px solid var(--primary-color);border-radius:12px;box-shadow:0 0 0 20000px rgba(0,0,0,.45);transition:all .25s ease;pointer-events:none}
-    .tour-popover{position:absolute;z-index:9999;background:var(--card-background);border:1px solid var(--border-color);border-radius:12px;box-shadow:var(--shadow-lg);padding:12px;min-width:260px;max-width:360px}
+    .tour-popover{position:absolute;z-index:9999;background:var(--card-background);backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:16px;box-shadow:var(--glass-shadow);padding:20px;min-width:300px;max-width:400px}
     .tour-header{display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--text-primary);margin-bottom:6px}
     .tour-body{color:var(--text-secondary);font-size:14px;margin-bottom:10px}
     .tour-footer{display:flex;justify-content:space-between;align-items:center}
@@ -2185,6 +2572,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // SompoApp initialized
   const app = new SompoApp();
   window.sompoApp = app;
+  window.app = app; // For React integration
   // Compatibilidade com o onclick="if(window.authManager) ..."
   window.authManager = {
     handleLogin: () => app.handleLogin(),
