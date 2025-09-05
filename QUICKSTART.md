@@ -20,6 +20,12 @@ start.ps1
 node start.js
 ```
 
+### **Somente Frontend**
+```bash
+npm run frontend
+# abre em http://127.0.0.1:3000
+```
+
 ---
 
 ## **🔧 PRÉ-REQUISITOS**
@@ -106,6 +112,12 @@ npm run backend
 ```bash
 npm run frontend
 ```
+
+### **Novidades do Frontend**
+- Toggle de tema único (React) ao lado do botão de tour
+- Tour com navegação por setas, PageUp/Down e scroll
+- Dropdown de usuário com logout no perfil
+- Dashboard sincronizado com listas reais (cargas ativas e alertas)
 
 ### **Verificar qualidade**
 ```bash

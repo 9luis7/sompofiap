@@ -40,12 +40,13 @@ Sistema de monitoramento de carga em tempo real desenvolvido para Sompo Seguros,
 - **Logs**: Winston
 - **Documentação**: JSDoc + Swagger (planejado)
 
-### Frontend (Planejado)
-- **Framework**: React.js + TypeScript
-- **Maps**: Leaflet/Mapbox
-- **Gráficos**: Chart.js
-- **Estado**: Redux Toolkit
-- **UI**: Material-UI + Styled Components
+### Frontend (Atual)
+- Stack: HTML5/CSS3/JS com integração React via CDN
+- Tema: Dark/Light com botão único (React) e glassmorphism
+- UI: Efeitos de hover/anim, dropdown de usuário com logout
+- Tour: Navegação por setas, PageUp/Down e scroll
+- Maps: Leaflet (camadas, marcadores)
+- Gráficos: Chart.js
 
 ## 📁 Estrutura do Projeto
 
@@ -111,6 +112,10 @@ node start.js
 ```
 
 **📖 Para mais detalhes, consulte [QUICKSTART.md](QUICKSTART.md)**
+
+Observações do Frontend:
+- O servidor estático roda somente em `http://127.0.0.1:3000` (bind local)
+- Para iniciar apenas o frontend: `npm run frontend`
 
 ---
 
