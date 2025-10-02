@@ -1,5 +1,8 @@
 # Estrutura do Banco de Dados - Sistema de Monitoramento de Cargas
 
+> **📁 Localização**: `docs/database/db_structure.md`  
+> **🔗 Ver também**: [README do Banco de Dados](README.md)
+
 ## Visão Geral
 Banco de dados PostgreSQL com extensão PostGIS para suporte a dados geográficos e espaciais.
 

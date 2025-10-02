@@ -1,0 +1,6 @@
+alert_type,severity,message,shipment_id,vehicle_plate,location,timestamp,is_acknowledged,description
+high_risk_zone,high,Veículo ABC-1234 entrou na BR-116 Sul - Zona de Alto Risco,1,ABC-1234,Rio de Janeiro RJ,2024-01-15 14:30:00,false,Monitoramento de zona de risco ativado
+emergency_stop,critical,PARADA DE EMERGÊNCIA: Veículo parado em zona crítica - BR-040,5,ABC-1234,Brasília DF,2024-01-15 14:25:00,false,Situação crítica requer intervenção imediata
+route_deviation,medium,Veículo DEF-5678 desviou da rota planejada em 2.3km,2,DEF-5678,Belo Horizonte MG,2024-01-15 14:20:00,false,Desvio de rota detectado pelo GPS
+speed_anomaly,low,Velocidade acima do limite em trecho urbano,4,JKL-3456,Recife PE,2024-01-15 14:15:00,true,Infração de velocidade registrada
+temperature_alert,medium,Temperatura da carga fora do padrão,2,DEF-5678,Salvador BA,2024-01-15 14:10:00,false,Medicamentos podem estar comprometidos

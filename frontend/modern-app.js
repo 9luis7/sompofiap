@@ -436,44 +436,30 @@ setupUserDropdown() {
   }
 
   async authenticateUser(username, password) {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock authentication
-    const validCredentials = {
-      'admin.sompo': 'password123',
-      'joao.silva': 'password123',
-      'cliente.techcom': 'password123',
-    };
-
-    if (validCredentials[username] && validCredentials[username] === password) {
-      return {
-        success: true,
-        data: {
-          token: 'mock-jwt-token-' + Date.now(),
-          refreshToken: 'mock-refresh-token-' + Date.now(),
-          user: {
-            id: username === 'admin.sompo' ? 1 : username === 'joao.silva' ? 2 : 3,
-            username: username,
-            role:
-              username === 'admin.sompo'
-                ? 'admin'
-                : username === 'joao.silva'
-                  ? 'operator'
-                  : 'client',
-            full_name:
-              username === 'admin.sompo'
-                ? 'Administrador Sompo'
-                : username === 'joao.silva'
-                  ? 'João Silva'
-                  : 'Cliente TechCom',
-          },
+    try {
+      // TODO: Conectar com API real de autenticação
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      };
-    } else {
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        return {
+          success: false,
+          message: 'Credenciais inválidas',
+        };
+      }
+    } catch (error) {
+      console.error('Erro na autenticação:', error);
       return {
         success: false,
-        message: 'Credenciais inválidas',
+        message: 'Erro de conexão com o servidor',
       };
     }
   }
@@ -517,9 +503,8 @@ setupUserDropdown() {
     // Setup real-time updates
     this.setupRealTimeUpdates();
 
-    // Prepare dataset, then sync metrics/charts to dataset and init mini map
-    this.generateDemoDataset();
-    this.syncMetricsToDataset();
+    // Load real data from backend API
+    this.loadRealDataFromBackend();
     this.initializeCharts();
     this.initMiniMap();
 
@@ -1208,127 +1193,45 @@ setupUserDropdown() {
     }
   }
 
-  // Demo dataset with detailed addresses
-  generateDemoDataset() {
-    const cities = [
-      {
-        cityUF: 'São Paulo, SP',
-        region: 'SP',
-        base: [-23.5505, -46.6333],
-        anchors: [
-          { name: 'Av. Paulista', lat: -23.5614, lng: -46.6554 },
-          { name: 'Av. Faria Lima', lat: -23.5716, lng: -46.6916 },
-          { name: 'Rua Oscar Freire', lat: -23.561, lng: -46.667 },
-          { name: 'Av. Rebouças', lat: -23.567, lng: -46.678 },
-          { name: 'Marginal Tietê', lat: -23.516, lng: -46.624 },
-        ],
-      },
-      {
-        cityUF: 'Rio de Janeiro, RJ',
-        region: 'RJ',
-        base: [-22.9068, -43.1729],
-        anchors: [
-          { name: 'Rua Barata Ribeiro', lat: -22.9694, lng: -43.1869 },
-          { name: 'Av. Brasil', lat: -22.8746, lng: -43.2465 },
-          { name: 'Rua Visconde de Pirajá', lat: -22.984, lng: -43.205 },
-          { name: 'Av. das Américas', lat: -23.0006, lng: -43.365 },
-          { name: 'Centro (Av. Rio Branco)', lat: -22.9035, lng: -43.1769 },
-        ],
-      },
-      {
-        cityUF: 'Belo Horizonte, MG',
-        region: 'MG',
-        base: [-19.9167, -43.9345],
-        anchors: [
-          { name: 'Av. Afonso Pena', lat: -19.9256, lng: -43.9378 },
-          { name: 'Av. Amazonas', lat: -19.919, lng: -43.956 },
-          { name: 'Rua da Bahia', lat: -19.9251, lng: -43.9362 },
-          { name: 'Av. Cristiano Machado', lat: -19.8678, lng: -43.9276 },
-          { name: 'Av. do Contorno', lat: -19.934, lng: -43.933 },
-        ],
-      },
-    ];
+  // Carrega dados reais do backend
+  async loadRealDataFromBackend() {
+    try {
+      // Carregar dados de diferentes endpoints em paralelo
+      const [shipmentsResponse, alertsResponse, vehiclesResponse, dashboardResponse] = await Promise.all([
+        fetch('/api/v1/shipments').catch(() => ({ json: () => Promise.resolve({ data: { shipments: [] } }) })),
+        fetch('/api/v1/alerts').catch(() => ({ json: () => Promise.resolve({ data: { alerts: [] } }) })),
+        fetch('/api/v1/vehicles').catch(() => ({ json: () => Promise.resolve({ data: { vehicles: [] } }) })),
+        fetch('/api/v1/monitoring/dashboard').catch(() => ({ json: () => Promise.resolve({ data: { summary: {} } }) }))
+      ]);
 
-    const shipments = [];
-    const alerts = [];
-    const vehicles = [];
-    let shipmentId = 1;
-    // Generate a realistic fleet with regional distribution
-    // SP: maior centro logístico (mais cargas/veículos)
-    // RJ/MG: centros menores (menos cargas/veículos)
-    const fleetDistribution = {
-      SP: { vehicles: 35, shipments: 80 }, // São Paulo: 35 veículos, 80 cargas
-      RJ: { vehicles: 25, shipments: 45 }, // Rio: 25 veículos, 45 cargas
-      MG: { vehicles: 20, shipments: 35 }, // BH: 20 veículos, 35 cargas
-    };
-    // Total: 80 veículos, 160 cargas (mais realista)
+      // Processar respostas
+      const shipmentsData = await shipmentsResponse.json();
+      const alertsData = await alertsResponse.json();
+      const vehiclesData = await vehiclesResponse.json();
+      const dashboardData = await dashboardResponse.json();
 
-    cities.forEach((c, _cIdx) => {
-      const fleet = fleetDistribution[c.region];
+      // Atualizar dados locais
+      this.demoData.shipments = shipmentsData.data?.shipments || [];
+      this.demoData.alerts = alertsData.data?.alerts || [];
+      this.demoData.vehicles = vehiclesData.data?.vehicles || [];
+      this.dashboardData = dashboardData.data || {};
 
-      // Jitter por região (RJ menor para evitar mar)
-      const jitter = c.region === 'RJ' ? { lat: 0.0012, lng: 0.0012 } : { lat: 0.002, lng: 0.0024 };
+      // Sincronizar métricas com dados reais
+      this.syncMetricsToDataset();
 
-      // Vehicles for this city (ancorados em vias reais)
-      for (let v = 0; v < fleet.vehicles; v++) {
-        const plate = `SOM-${c.region}-${String(v + 1).padStart(3, '0')}`;
-        const anchor = c.anchors[Math.floor(Math.random() * c.anchors.length)];
-        const lat = anchor.lat + (Math.random() - 0.5) * 2 * jitter.lat;
-        const lng = anchor.lng + (Math.random() - 0.5) * 2 * jitter.lng;
-        vehicles.push({ plate, cityUF: c.cityUF, region: c.region, lat, lng });
-      }
+      console.log('Dados carregados do backend:', {
+        shipments: this.demoData.shipments.length,
+        alerts: this.demoData.alerts.length,
+        vehicles: this.demoData.vehicles.length
+      });
 
-      for (let i = 0; i < fleet.shipments; i++) {
-        const status = i % 10 === 0 ? 'stopped' : i % 6 === 0 ? 'loading' : 'in_transit';
-        const anchor = c.anchors[Math.floor(Math.random() * c.anchors.length)];
-        const num = 100 + (i % 300);
-        const lat = anchor.lat + (Math.random() - 0.5) * 2 * jitter.lat;
-        const lng = anchor.lng + (Math.random() - 0.5) * 2 * jitter.lng;
-
-        // Define origem e destino simulados (também em terra firme)
-        const originAnchor = c.anchors[Math.floor(Math.random() * c.anchors.length)];
-        const destCity = cities[(Math.floor(Math.random() * cities.length) + 1) % cities.length];
-        const destAnchor = destCity.anchors[Math.floor(Math.random() * destCity.anchors.length)];
-        const originLat = originAnchor.lat + (Math.random() - 0.5) * jitter.lat;
-        const originLng = originAnchor.lng + (Math.random() - 0.5) * jitter.lng;
-        const destLat =
-          destAnchor.lat + (Math.random() - 0.5) * (destCity.region === 'RJ' ? 0.0012 : 0.002);
-        const destLng =
-          destAnchor.lng + (Math.random() - 0.5) * (destCity.region === 'RJ' ? 0.0012 : 0.0024);
-        const route = this.generateRoute(originLat, originLng, destLat, destLng, 14);
-        shipments.push({
-          id: shipmentId,
-          shipmentNumber: `${c.region}-${String(shipmentId).padStart(5, '0')}`,
-          cityUF: c.cityUF,
-          region: c.region,
-          status,
-          address: `${anchor.name}, ${num} - ${c.cityUF}`,
-          lat,
-          lng,
-          originLat,
-          originLng,
-          destLat,
-          destLng,
-          route,
-        });
-        // Alertas coerentes: parte das cargas gera alerta
-        if (Math.random() < 0.12) {
-          const types = ['Roubo', 'Acidente', 'Desvio de rota'];
-          alerts.push({
-            id: shipmentId * 100 + i,
-            region: c.region,
-            type: types[i % types.length],
-            address: `${anchor.name}, ${num} - ${c.cityUF}`,
-            lat,
-            lng,
-          });
-        }
-        shipmentId++;
-      }
-    });
-    this.demoData.shipments = shipments;
-    this.demoData.alerts = alerts;
-    this.demoData.vehicles = vehicles;
+    } catch (error) {
+      console.error('Erro ao carregar dados do backend:', error);
+      // Manter arrays vazios em caso de erro
+      this.demoData.shipments = [];
+      this.demoData.alerts = [];
+      this.demoData.vehicles = [];
+    }
   }
 
   generateRoute(lat1, lng1, lat2, lng2, points = 12) {
@@ -1951,22 +1854,24 @@ setupUserDropdown() {
     }
 
     // Update section content based on section
-    this.updateSectionContent(section);
+    this.updateSectionContent(section).catch(error => {
+      console.error('Erro ao carregar conteúdo da seção:', error);
+    });
   }
 
-  updateSectionContent(section) {
+  async updateSectionContent(section) {
     switch (section) {
       case 'dashboard':
         this.loadDashboardData();
         break;
       case 'shipments':
-        this.loadShipmentsData();
+        await this.loadShipmentsData();
         break;
       case 'vehicles':
-        this.loadVehiclesData();
+        await this.loadVehiclesData();
         break;
       case 'alerts':
-        this.loadAlertsData();
+        await this.loadAlertsData();
         break;
       case 'map':
         this.loadMapData();
@@ -1975,15 +1880,20 @@ setupUserDropdown() {
   }
 
   loadDashboardData() {
-    // Dashboard data is already loaded
-    // Dashboard data loaded
+    // Dashboard data loaded from backend in loadRealDataFromBackend()
+    // Refresh data periodically
+    setTimeout(() => this.loadRealDataFromBackend(), 30000); // Refresh every 30 seconds
   }
 
-  loadShipmentsData() {
+  async loadShipmentsData() {
     const list = document.getElementById('shipments-list');
     if (!list) {
       return;
     }
+    
+    // Recarregar dados do backend
+    await this.loadRealDataFromBackend();
+    
     // Mostrar somente cargas ativas (exclui paradas) e atualizar contagem
     const items = this.getActiveShipments().slice(0, 60);
     this.metrics.shipments = this.getActiveShipments().length;
@@ -2020,26 +1930,42 @@ setupUserDropdown() {
     });
   }
 
-  loadVehiclesData() {
+  async loadVehiclesData() {
     const list = document.getElementById('vehicles-list');
     if (!list) {
       return;
     }
+    
+    // Recarregar dados do backend
+    await this.loadRealDataFromBackend();
+    
     const vehicles = {};
     // base vehicles from dataset
     this.demoData.vehicles.forEach(v => {
-      vehicles[v.plate] = { plate: v.plate, lastCity: v.cityUF, status: 'in_transit', count: 0 };
+      vehicles[v.plate || v.license_plate] = { 
+        plate: v.plate || v.license_plate, 
+        lastCity: v.cityUF || v.current_location, 
+        status: v.status || 'available', 
+        count: 0 
+      };
     });
+    
     // attach shipments to vehicles deterministically
     this.demoData.shipments.forEach(s => {
       const vIdx = s.id % Math.max(1, this.demoData.vehicles.length);
-      const plate = this.demoData.vehicles[vIdx].plate;
+      const vehicle = this.demoData.vehicles[vIdx];
+      const plate = vehicle?.plate || vehicle?.license_plate;
       if (!vehicles[plate]) {
-        vehicles[plate] = { plate, lastCity: s.cityUF, status: s.status, count: 0 };
+        vehicles[plate] = { 
+          plate, 
+          lastCity: s.originAddress, 
+          status: s.status, 
+          count: 0 
+        };
       }
       vehicles[plate].count += 1;
       vehicles[plate].status = s.status;
-      vehicles[plate].lastCity = s.cityUF;
+      vehicles[plate].lastCity = s.originAddress;
     });
     const arr = Object.values(vehicles).slice(0, 60);
     list.innerHTML = arr
@@ -2060,11 +1986,15 @@ setupUserDropdown() {
       .join('');
   }
 
-  loadAlertsData() {
+  async loadAlertsData() {
     const list = document.getElementById('alerts-list');
     if (!list) {
       return;
     }
+    
+    // Recarregar dados do backend
+    await this.loadRealDataFromBackend();
+    
     // Lista dinâmica: todos os alertas atuais e sincroniza contagem do dashboard
     const items = (this.demoData.alerts || []).slice(0, 100);
     this.metrics.alerts = (this.demoData.alerts || []).length;
