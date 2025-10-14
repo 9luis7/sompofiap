@@ -4,30 +4,43 @@
 
 ## 📋 Índice da Documentação
 
+> **Atalho**: Veja o [Índice Completo](INDEX.md) para navegação rápida
+
+### **📊 [Análises e Estudos](analysis/README.md)**
+- **MVP**: Análise completa do MVP implementado
+- **Relatórios**: Documentação de progresso
+- **Estudos**: Análises técnicas e de viabilidade
+
+### **🔧 [Troubleshooting](troubleshooting/README.md)**
+- **Correções**: Soluções de bugs conhecidos
+- **Debug**: Guias de resolução de problemas
+- **FAQs**: Perguntas frequentes técnicas
+
 ### **🗄️ [Banco de Dados](database/README.md)**
 - **Visão Geral**: PostgreSQL + PostGIS para dados geográficos
 - **Estrutura**: Esquema completo das tabelas
 - **Configuração**: Setup e instalação
 - **Performance**: Índices e otimizações
-- **Manutenção**: Backup e monitoramento
+
+### **🤖 [Sistema Ensemble](ensemble/ENSEMBLE_SYSTEM.md)**
+- **ML Pipeline**: Sistema de múltiplos modelos
+- **APIs**: Integração Python + Node.js
+- **Predições**: Classificação e risco combinados
 
 ### **🛠️ [Qualidade de Código](quality/README.md)**
 - **Ferramentas**: ESLint, Prettier, Stylelint, HTMLHint
 - **Configuração**: VS Code e scripts automatizados
 - **Resultados**: Status e métricas de qualidade
-- **Uso**: Comandos e boas práticas
 
-### **🔄 [Refatoração e CSV](refactoring/README.md)**
+### **🔄 [Refatoração](refactoring/README.md)**
 - **Sistema CSV**: Importação de dados reais
 - **Arquitetura**: Backend como fonte de verdade
 - **Templates**: Exemplos e estruturas de dados
-- **Status**: Refatoração completa realizada
 
 ### **📋 [Especificações](specifications/README.md)**
 - **Objetivos**: Visão geral do projeto
 - **Funcionalidades**: Recursos implementados
 - **Arquitetura**: Tecnologias e estrutura
-- **Cronograma**: Desenvolvimento e roadmap
 
 ## 🚀 Inicialização Rápida
 
@@ -58,19 +71,33 @@
 ### **📁 Organização Final**
 ```
 docs/
-├── README.md                    # Este arquivo
-├── database/                    # 🗄️ Documentação do banco
+├── INDEX.md                         # 🔍 Índice navegável completo
+├── README.md                        # Este arquivo
+│
+├── analysis/                        # 📊 Análises e estudos
+│   ├── README.md
+│   └── ANALISE_COMPLETA_MVP.md
+│
+├── troubleshooting/                 # 🔧 Soluções de problemas
+│   ├── README.md
+│   └── CORRECOES_SIMULADOR.md
+│
+├── database/                        # 🗄️ Documentação do banco
 │   ├── README.md
 │   └── db_structure.md
-├── quality/                     # 🛠️ Qualidade de código
-│   ├── README.md
-│   ├── QUALITY_README.md
-│   └── LINTING_SUMMARY.md
-├── refactoring/                 # 🔄 Sistema CSV
+│
+├── ensemble/                        # 🤖 Sistema de ML
+│   └── ENSEMBLE_SYSTEM.md
+│
+├── quality/                         # 🛠️ Qualidade de código
+│   └── README.md
+│
+├── refactoring/                     # 🔄 Refatoração
 │   ├── README.md
 │   ├── REFACTORING_GUIDE.md
 │   └── PROJECT_STRUCTURE.md
-└── specifications/              # 📋 Especificações
+│
+└── specifications/                  # 📋 Especificações
     ├── README.md
     ├── project_specs.md
     └── insurance-map-features.md
@@ -83,21 +110,25 @@ docs/
 #### **👨‍💻 Desenvolvedor**
 - [README Principal](../README.md) - Visão técnica completa
 - [Banco de Dados](database/README.md) - Configuração técnica
+- [Sistema Ensemble](ensemble/ENSEMBLE_SYSTEM.md) - ML Pipeline
+- [Troubleshooting](troubleshooting/README.md) - Soluções de problemas
 - [Qualidade](quality/README.md) - Ferramentas de desenvolvimento
 - [Refatoração](refactoring/README.md) - Sistema de dados
 
 #### **📊 Analista de Negócio**
+- [Análise do MVP](analysis/ANALISE_COMPLETA_MVP.md) - Análise completa
 - [Especificações](specifications/README.md) - Objetivos e funcionalidades
 - [Funcionalidades do Mapa](specifications/insurance-map-features.md) - Recursos específicos
-- [README Simplificado](../README-SIMPLIFICADO.md) - Visão executiva
 
 #### **🔧 Administrador de Sistema**
-- [QUICKSTART](../QUICKSTART.md) - Instalação rápida
+- [README Principal](../README.md) - Instalação e configuração
+- [Troubleshooting](troubleshooting/README.md) - Resolução de problemas
 - [Banco de Dados](database/README.md) - Setup e manutenção
 - [Qualidade](quality/README.md) - Monitoramento de código
 
 #### **🎯 Stakeholder**
 - [README Principal](../README.md) - Visão geral do projeto
+- [Análise do MVP](analysis/ANALISE_COMPLETA_MVP.md) - Progresso e resultados
 - [Especificações](specifications/README.md) - Objetivos e benefícios
 - [Funcionalidades do Mapa](specifications/insurance-map-features.md) - Valor agregado
 

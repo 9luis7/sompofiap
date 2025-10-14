@@ -422,12 +422,17 @@
                   
                   <div class="form-group">
                     <label for="risk-br">Rodovia (BR)</label>
-                    <input type="number" id="risk-br" placeholder="Ex: 116" required min="1" max="999">
+                    <select id="risk-br" required disabled>
+                      <option value="">Selecione primeiro o Estado</option>
+                    </select>
+                    <small id="highway-info" style="color: var(--text-secondary); margin-top: 4px; display: none;"></small>
                   </div>
                   
                   <div class="form-group">
                     <label for="risk-km">Quilômetro</label>
-                    <input type="number" id="risk-km" placeholder="Ex: 523.5" required min="0" step="0.1">
+                    <input type="number" id="risk-km" placeholder="Ex: 523.5" required min="0" step="0.1" disabled>
+                    <small id="km-range-info" style="color: var(--text-secondary); margin-top: 4px; display: none;"></small>
+                    <div id="km-validation-error" class="validation-error" style="display: none;"></div>
                   </div>
                 </div>
 
@@ -536,10 +541,17 @@
           <div class="charts-grid">
             <div class="chart-card glass-card">
               <div class="chart-header">
-                <h3>Status das Cargas</h3>
+                <h3>🚨 Distribuição de Risco</h3>
                 <div class="chart-actions">
+                  <span class="status-badge" id="risk-status-badge">
+                    <i class="fas fa-circle" style="color: #10b981;"></i>
+                    <span>Monitorando</span>
+                  </span>
+                  <button class="btn-icon refresh-btn" title="Atualizar" onclick="updateRiskCharts()">
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
                   <button class="btn-icon">
-                    <i class="fas fa-ellipsis-v"></i>
+                    <i class="fas fa-expand"></i>
                   </button>
                 </div>
               </div>
@@ -551,10 +563,17 @@
 
             <div class="chart-card glass-card">
               <div class="chart-header">
-                <h3>Alertas por Região</h3>
+                <h3>⚠️ Top Rodovias Perigosas</h3>
                 <div class="chart-actions">
+                  <span class="status-badge" id="highways-status-badge">
+                    <i class="fas fa-circle" style="color: #dc2626;"></i>
+                    <span>Ativo</span>
+                  </span>
+                  <button class="btn-icon refresh-btn" title="Atualizar" onclick="updateHighwaysChart()">
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
                   <button class="btn-icon">
-                    <i class="fas fa-ellipsis-v"></i>
+                    <i class="fas fa-expand"></i>
                   </button>
                 </div>
               </div>

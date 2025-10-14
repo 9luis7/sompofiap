@@ -53,23 +53,31 @@ echo ═════════════════════════
 echo    ✅ INICIANDO SISTEMA
 echo ═══════════════════════════════════════════════════════
 echo.
-echo 🔧 Backend:  http://localhost:3001
-echo 🌐 Frontend: http://localhost:8080
+echo 🔧 Backend + ML API: http://localhost:3001
+echo 🌐 Frontend:         http://localhost:8080
+echo 🤖 ML Python API:    http://localhost:5000 (gerenciado automaticamente)
 echo.
 echo 👤 Login: admin.sompo / password123
 echo.
+echo ⚡ O Backend irá iniciar automaticamente a API Python de ML
+echo    Aguarde até ver "✅ SISTEMA SOMPO - OPERACIONAL"
+echo.
 
-:: Iniciar backend em terminal separado
-start "Sompo Backend API" cmd /k "cd /d %~dp0backend && echo 🚀 Backend API rodando... && node dist/server.js"
+:: Iniciar backend em terminal separado (ele gerencia o ML)
+start "Sompo Backend + ML API" cmd /k "cd /d %~dp0backend && echo 🚀 Iniciando Backend (com ML integrado)... && node dist/server.js"
 
-:: Aguardar backend inicializar
-timeout /t 5 /nobreak >nul
+:: Aguardar backend e ML inicializarem
+echo Aguardando inicialização completa...
+timeout /t 10 /nobreak >nul
 
 :: Iniciar frontend (com cache desabilitado para desenvolvimento)
 start "Sompo Frontend" cmd /k "cd /d %~dp0 && echo 🌐 Frontend servido em http://localhost:8080 && npx http-server frontend -p 8080 -c-1 -o"
 
 echo.
 echo ✅ Sistema iniciado!
+echo.
+echo 💡 Dica: O Motor de ML agora inicia automaticamente com o backend
+echo    Não é mais necessário executar start_ml_api.bat separadamente
 echo.
 echo 📖 Documentação: README.md
 echo.

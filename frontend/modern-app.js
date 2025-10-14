@@ -340,21 +340,9 @@ class SompoApp {
   }
 
   updateChartsWithCurrentStats() {
-    const activeShipments = this.getStatNumber('[data-target-section="shipments"] .stat-number');
-    // const criticalAlerts = this.getStatNumber('[data-target-section="alerts"] .stat-number');
-    if (this.charts.status) {
-      const baseLoading = Math.floor(activeShipments * 0.12);
-      const baseStopped = Math.floor(activeShipments * 0.06);
-      const inTransit = Math.max(0, activeShipments - baseLoading - baseStopped);
-      this.charts.status.data.datasets[0].data = [inTransit, baseLoading, baseStopped];
-      this.charts.status.update('none');
-    }
-    if (this.charts.alerts) {
-      const regions = this.charts.alerts.data.labels || ['SP', 'RJ', 'MG'];
-      const regData = regions.map(() => 0);
-      this.charts.alerts.data.datasets[0].data = regData;
-      this.charts.alerts.update('none');
-    }
+    // Atualizar os novos gráficos com dados reais
+    this.updateRiskDistributionChart();
+    this.updateDangerousHighwaysChart();
   }
 
   initializeCharts() {
@@ -373,37 +361,48 @@ class SompoApp {
       inTransit = 0;
     }
 
-    // Status doughnut chart
+    // 1. Distribuição de Risco (substitui Status das Cargas)
     const statusCtx = document.getElementById('chart-status');
     if (statusCtx) {
       if (chartsAvailable) {
-        if (this.charts.status) {
-          this.charts.status.destroy();
+        if (this.charts.riskDistribution) {
+          this.charts.riskDistribution.destroy();
         }
-        this.charts.status = new Chart(statusCtx, {
+        this.charts.riskDistribution = new Chart(statusCtx, {
           type: 'doughnut',
           data: {
-            labels: ['Em trânsito', 'Carregando', 'Parado'],
-            datasets: [
-              {
-                data: [inTransit, baseLoading, baseStopped],
-                backgroundColor: ['#3b82f6', '#f59e0b', '#94a3b8'],
-                borderWidth: 0,
-              },
-            ],
+            labels: ['Baixo Risco', 'Moderado', 'Alto Risco', 'Crítico'],
+            datasets: [{
+              data: [0, 0, 0, 0], // Será atualizado via API
+              backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#dc2626'],
+              borderWidth: 0,
+            }]
           },
           options: {
             responsive: true,
             plugins: {
               legend: {
                 position: 'bottom',
-                labels: {
+                labels: { 
+                  padding: 20, 
+                  usePointStyle: true,
                   color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
-                },
+                }
               },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                    return `${label}: ${value} cargas (${percentage}%)`;
+                  }
+                }
+              }
             },
             cutout: '60%',
-          },
+          }
         });
       } else {
         // Fallback donut
@@ -443,55 +442,87 @@ class SompoApp {
       }
     }
 
-    // Alerts bar chart - counts by region based on demo dataset
-    const regions = ['SP', 'RJ', 'MG'];
-    const regData = this.countAlertsByRegion(regions);
+    // 2. Top Rodovias Perigosas (substitui Alertas por Região)
     const alertsCtx = document.getElementById('chart-alerts');
     if (alertsCtx) {
       if (chartsAvailable) {
-        if (this.charts.alerts) {
-          this.charts.alerts.destroy();
+        if (this.charts.dangerousHighways) {
+          this.charts.dangerousHighways.destroy();
         }
-        this.charts.alerts = new Chart(alertsCtx, {
+        this.charts.dangerousHighways = new Chart(alertsCtx, {
           type: 'bar',
           data: {
-            labels: regions,
-            datasets: [
-              {
-                label: 'Críticos',
-                data: regData, // now exact dataset counts
-                backgroundColor: '#ef4444',
-                borderRadius: 6,
+            labels: [], // Será preenchido via API
+            datasets: [{
+              label: 'Score de Risco',
+              data: [],
+              backgroundColor: function(context) {
+                if (!context.parsed || context.parsed.y === undefined) {
+                  return '#6b7280'; // Cor padrão quando não há dados
+                }
+                const value = context.parsed.y;
+                if (value >= 80) return '#dc2626'; // Crítico
+                if (value >= 60) return '#f97316'; // Alto
+                if (value >= 40) return '#f59e0b'; // Moderado
+                return '#10b981'; // Baixo
               },
-            ],
+              borderWidth: 0,
+              borderRadius: 4
+            }]
           },
           options: {
+            indexAxis: 'y', // Barras horizontais
             responsive: true,
-            plugins: { legend: { display: false } },
             scales: {
               x: {
+                beginAtZero: true,
+                max: 100,
+                title: {
+                  display: true,
+                  text: 'Score de Risco (0-100)',
+                  color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
+                },
                 ticks: {
                   color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
                 },
-                grid: { display: false },
+                grid: {
+                  color: getComputedStyle(document.body).getPropertyValue('--border-color'),
+                },
               },
               y: {
-                beginAtZero: true,
-                ticks: {
-                  stepSize: 1,
+                title: {
+                  display: true,
+                  text: 'Rodovia',
                   color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
                 },
-                grid: { color: 'rgba(148,163,184,0.2)' },
-              },
+                ticks: {
+                  color: getComputedStyle(document.body).getPropertyValue('--text-secondary'),
+                },
+                grid: {
+                  display: false,
+                },
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: function(context) {
+                    return context[0].label;
+                  },
+                  label: function(context) {
+                    return `Score: ${context.parsed.x.toFixed(1)}`;
+                  }
+                }
+              }
             },
             onClick: (evt, els) => {
               if (!els.length) {
                 return;
               }
-              const idx = els[0].index;
-              const region = regions[idx];
-              this.highlightRegionOnMap(region);
-              this.renderAlertsDetails(region);
+              const highway = els[0].label;
+              this.showNotification(`Detalhes da rodovia: ${highway}`, 'info');
+              // TODO: Implementar modal com detalhes da rodovia
             },
           },
         });
@@ -511,16 +542,25 @@ class SompoApp {
         alertsCtx.replaceWith(wrap);
       }
     }
-    // Click handler for status chart
-    if (this.charts.status) {
-      this.charts.status.options.onClick = (evt, els) => {
-        if (!els.length) {
-          return;
+    // Click handlers para os novos gráficos
+    if (this.charts.riskDistribution) {
+      this.charts.riskDistribution.options.onClick = (evt, els) => {
+        if (els.length > 0) {
+          const riskLevel = ['baixo', 'moderado', 'alto', 'critico'][els[0].index];
+          this.showNotification(`Filtrando alertas por: ${riskLevel.toUpperCase()}`, 'info');
+          this.navigateToSection('alerts');
+          // TODO: Implementar filtro de alertas por nível de risco
         }
-        const idx = els[0].index; // 0=inTransit,1=loading,2=stopped
-        const key = idx === 0 ? 'in_transit' : idx === 1 ? 'loading' : 'stopped';
-        this.highlightShipmentsOnMap(key);
-        this.renderStatusDetails(key);
+      };
+    }
+
+    if (this.charts.dangerousHighways) {
+      this.charts.dangerousHighways.options.onClick = (evt, els) => {
+        if (els.length > 0) {
+          const highway = els[0].label;
+          this.showNotification(`Detalhes da rodovia: ${highway}`, 'info');
+          // TODO: Implementar modal com detalhes da rodovia
+        }
       };
     }
   }
@@ -2194,17 +2234,17 @@ class SompoApp {
                 .map(
                   s => `
                   <tr>
-                    <td>${s.shipment_number}</td>
+                    <td>${s.shipment_number || s.shipmentNumber || 'N/A'}</td>
                     <td><span class="badge-status ${s.status}">${s.status}</span></td>
                     <td>
                       <div class="mini-progress-bar">
-                        <div class="mini-progress-fill" style="width: ${s.progress_percent}%"></div>
-                        <span class="mini-progress-text">${s.progress_percent.toFixed(0)}%</span>
+                        <div class="mini-progress-fill" style="width: ${(s.progress_percent || s.progress || 0)}%"></div>
+                        <span class="mini-progress-text">${(s.progress_percent || s.progress || 0).toFixed(0)}%</span>
                       </div>
                     </td>
                     <td>
-                      <span class="risk-badge risk-${this.getRiskLevel(s.current_risk_score)}">
-                        ${s.current_risk_score.toFixed(0)}
+                      <span class="risk-badge risk-${this.getRiskLevel(s.current_risk_score || s.risk_score || 0)}">
+                        ${(s.current_risk_score || s.risk_score || 0).toFixed(0)}
                       </span>
                     </td>
                   </tr>
@@ -2232,7 +2272,7 @@ class SompoApp {
    */
   async checkMLStatus() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/risk/status`);
+      const response = await fetch(`${window.API_BASE_URL}/risk/status`);
       const data = await response.json();
 
       if (data.success) {
@@ -2268,6 +2308,31 @@ class SompoApp {
       await this.checkRisk();
     });
 
+    // Setup UF change listener for dynamic highway loading
+    const ufSelect = document.getElementById('risk-uf');
+    const brSelect = document.getElementById('risk-br');
+    const kmInput = document.getElementById('risk-km');
+    
+    if (ufSelect) {
+      ufSelect.addEventListener('change', async (e) => {
+        await this.loadHighwaysForUF(e.target.value);
+      });
+    }
+
+    // Setup BR change listener for KM validation
+    if (brSelect) {
+      brSelect.addEventListener('change', (e) => {
+        this.updateKMValidation(e.target.value);
+      });
+    }
+
+    // Setup KM input listener for real-time validation
+    if (kmInput) {
+      kmInput.addEventListener('input', (e) => {
+        this.validateKMInput(e.target.value);
+      });
+    }
+
     // Update badge when checkbox changes
     const mlCheckbox = document.getElementById('use-ml-model');
     if (mlCheckbox) {
@@ -2285,15 +2350,140 @@ class SompoApp {
   }
 
   /**
+   * Load highways for a specific UF
+   */
+  async loadHighwaysForUF(uf) {
+    const brSelect = document.getElementById('risk-br');
+    const kmInput = document.getElementById('risk-km');
+    const highwayInfo = document.getElementById('highway-info');
+    
+    if (!uf) {
+      brSelect.disabled = true;
+      brSelect.innerHTML = '<option value="">Selecione primeiro o Estado</option>';
+      kmInput.disabled = true;
+      highwayInfo.style.display = 'none';
+      return;
+    }
+
+    // Show loading state
+    brSelect.disabled = true;
+    brSelect.innerHTML = '<option value="">Carregando rodovias...</option>';
+    kmInput.disabled = true;
+
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/highways/dropdown/${uf}`);
+      const data = await response.json();
+
+      if (data.success) {
+        brSelect.innerHTML = '<option value="">Selecione uma rodovia</option>';
+        
+        data.data.options.forEach(option => {
+          const opt = document.createElement('option');
+          opt.value = option.value;
+          opt.textContent = option.label;
+          opt.dataset.minKm = option.min_km;
+          opt.dataset.maxKm = option.max_km;
+          opt.dataset.accidents = option.accidents;
+          brSelect.appendChild(opt);
+        });
+
+        brSelect.disabled = false;
+      } else {
+        brSelect.innerHTML = '<option value="">Erro ao carregar rodovias</option>';
+      }
+    } catch (error) {
+      console.error('Erro ao carregar rodovias:', error);
+      brSelect.innerHTML = '<option value="">Erro ao carregar rodovias</option>';
+    }
+  }
+
+  /**
+   * Update KM validation when BR changes
+   */
+  updateKMValidation(br) {
+    const brSelect = document.getElementById('risk-br');
+    const kmInput = document.getElementById('risk-km');
+    const kmRangeInfo = document.getElementById('km-range-info');
+    const kmValidationError = document.getElementById('km-validation-error');
+    
+    if (!br) {
+      kmInput.disabled = true;
+      kmRangeInfo.style.display = 'none';
+      kmValidationError.style.display = 'none';
+      return;
+    }
+
+    const selectedOption = brSelect.options[brSelect.selectedIndex];
+    if (selectedOption && selectedOption.dataset.minKm) {
+      const minKm = parseFloat(selectedOption.dataset.minKm);
+      const maxKm = parseFloat(selectedOption.dataset.maxKm);
+      
+      kmInput.disabled = false;
+      kmInput.min = minKm;
+      kmInput.max = maxKm;
+      kmInput.placeholder = `Ex: ${(minKm + (maxKm - minKm) / 2).toFixed(1)}`;
+      
+      kmRangeInfo.textContent = `KM válido: ${minKm} - ${maxKm}`;
+      kmRangeInfo.style.display = 'block';
+      
+      // Clear any previous validation errors
+      kmValidationError.style.display = 'none';
+    }
+  }
+
+  /**
+   * Validate KM input in real-time
+   */
+  async validateKMInput(kmValue) {
+    const uf = document.getElementById('risk-uf').value;
+    const br = document.getElementById('risk-br').value;
+    const kmValidationError = document.getElementById('km-validation-error');
+    
+    if (!uf || !br || !kmValue) {
+      kmValidationError.style.display = 'none';
+      return;
+    }
+
+    const km = parseFloat(kmValue);
+    if (isNaN(km)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/highways/validate?uf=${uf}&br=${br}&km=${km}`);
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.data.valid) {
+          kmValidationError.style.display = 'none';
+        } else {
+          kmValidationError.textContent = data.data.message;
+          kmValidationError.style.display = 'block';
+        }
+      }
+    } catch (error) {
+      console.error('Erro na validação de KM:', error);
+    }
+  }
+
+  /**
    * Check risk for a specific segment
    */
   async checkRisk() {
     const uf = document.getElementById('risk-uf').value;
-    const br = document.getElementById('risk-br').value;
+    const brSelect = document.getElementById('risk-br');
+    const selectedOption = brSelect.options[brSelect.selectedIndex];
+    const br = selectedOption ? selectedOption.value : '';
     const km = parseFloat(document.getElementById('risk-km').value);
     const hour = document.getElementById('risk-hour').value;
     const weather = document.getElementById('risk-weather').value;
     const useML = document.getElementById('use-ml-model').checked;
+
+    // Validate required fields
+    if (!uf || !br || !km) {
+      this.showNotification('Por favor, preencha todos os campos obrigatórios', 'error');
+      return;
+    }
 
     const btn = document.getElementById('check-risk-btn');
     const originalHtml = btn.innerHTML;
@@ -2313,7 +2503,7 @@ class SompoApp {
         useRealTimeML: useML
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/risk/predict`, {
+      const response = await fetch(`${window.API_BASE_URL}/risk/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
@@ -2444,6 +2634,180 @@ class SompoApp {
       element.textContent = current.toFixed(1);
     }, 16);
   }
+
+  // ============================================================================
+  // NOVAS FUNÇÕES PARA ATUALIZAÇÃO DE GRÁFICOS
+  // ============================================================================
+
+  /**
+   * Atualiza o gráfico de distribuição de risco com dados reais
+   */
+  async updateRiskDistributionChart() {
+    try {
+      // 1. Buscar cargas ativas
+      const shipmentsResponse = await fetch(`${window.API_BASE_URL}/simulator/active`);
+      const shipmentsData = await shipmentsResponse.json();
+      
+      if (!shipmentsData.success) return;
+      
+      // 2. Calcular distribuição de risco
+      const riskCounts = { baixo: 0, moderado: 0, alto: 0, critico: 0 };
+      
+      for (const shipment of shipmentsData.data.shipments) {
+        const score = shipment.risk_score || 0;
+        
+        if (score >= 80) riskCounts.critico++;
+        else if (score >= 60) riskCounts.alto++;
+        else if (score >= 40) riskCounts.moderado++;
+        else riskCounts.baixo++;
+      }
+      
+      // 3. Atualizar gráfico
+      if (this.charts.riskDistribution) {
+        this.charts.riskDistribution.data.datasets[0].data = [
+          riskCounts.baixo,
+          riskCounts.moderado,
+          riskCounts.alto,
+          riskCounts.critico
+        ];
+        this.charts.riskDistribution.update('none');
+      }
+      
+      // 4. Atualizar badge de status
+      this.updateRiskStatusBadge(riskCounts);
+      
+    } catch (error) {
+      console.error('Error updating risk distribution:', error);
+    }
+  }
+
+  /**
+   * Atualiza o gráfico de rodovias perigosas com dados do ML
+   */
+  async updateDangerousHighwaysChart() {
+    try {
+      // Buscar segmentos de alto risco
+      const response = await fetch(`${window.API_BASE_URL}/risk/high-risk-segments?limit=5`);
+      const data = await response.json();
+      
+      if (!data.success) return;
+      
+      // Preparar dados para o gráfico
+      const labels = [];
+      const scores = [];
+      
+      data.data.segments.slice(0, 5).forEach(segment => {
+        labels.push(`${segment.uf}-BR${segment.br} KM ${segment.km}`);
+        scores.push(segment.avg_risk_score);
+      });
+      
+      // Atualizar gráfico
+      if (this.charts.dangerousHighways) {
+        this.charts.dangerousHighways.data.labels = labels;
+        this.charts.dangerousHighways.data.datasets[0].data = scores;
+        this.charts.dangerousHighways.update('none');
+      }
+      
+      // Atualizar badge de status
+      this.updateHighwaysStatusBadge(data.data.segments.length);
+      
+    } catch (error) {
+      console.error('Error updating dangerous highways chart:', error);
+    }
+  }
+
+  /**
+   * Atualiza o badge de status do gráfico de risco
+   */
+  updateRiskStatusBadge(riskCounts) {
+    const badge = document.getElementById('risk-status-badge');
+    if (!badge) return;
+    
+    const total = riskCounts.baixo + riskCounts.moderado + riskCounts.alto + riskCounts.critico;
+    const criticalPercentage = total > 0 ? (riskCounts.critico / total) * 100 : 0;
+    
+    const icon = badge.querySelector('i');
+    const text = badge.querySelector('span');
+    
+    if (criticalPercentage > 20) {
+      icon.style.color = '#dc2626'; // Vermelho para muitos críticos
+      text.textContent = 'Alerta';
+    } else if (criticalPercentage > 10) {
+      icon.style.color = '#f97316'; // Laranja para alguns críticos
+      text.textContent = 'Atenção';
+    } else {
+      icon.style.color = '#10b981'; // Verde para baixo risco
+      text.textContent = 'Normal';
+    }
+  }
+
+  /**
+   * Atualiza o badge de status do gráfico de rodovias
+   */
+  updateHighwaysStatusBadge(segmentCount) {
+    const badge = document.getElementById('highways-status-badge');
+    if (!badge) return;
+    
+    const icon = badge.querySelector('i');
+    const text = badge.querySelector('span');
+    
+    if (segmentCount >= 5) {
+      icon.style.color = '#dc2626'; // Vermelho para muitos segmentos críticos
+      text.textContent = 'Crítico';
+    } else if (segmentCount >= 3) {
+      icon.style.color = '#f97316'; // Laranja para alguns segmentos críticos
+      text.textContent = 'Alto';
+    } else {
+      icon.style.color = '#10b981'; // Verde para poucos segmentos críticos
+      text.textContent = 'Baixo';
+    }
+  }
+
+  /**
+   * Função global para atualizar gráficos de risco (chamada pelos botões)
+   */
+  async updateRiskCharts() {
+    const btn = document.querySelector('.refresh-btn');
+    if (btn) {
+      btn.classList.add('rotating');
+    }
+    
+    try {
+      await Promise.all([
+        this.updateRiskDistributionChart(),
+        this.updateDangerousHighwaysChart()
+      ]);
+      
+      this.showNotification('Gráficos atualizados com sucesso!', 'success');
+    } catch (error) {
+      this.showNotification('Erro ao atualizar gráficos', 'error');
+    } finally {
+      if (btn) {
+        setTimeout(() => btn.classList.remove('rotating'), 1000);
+      }
+    }
+  }
+
+  /**
+   * Função global para atualizar apenas gráfico de rodovias
+   */
+  async updateHighwaysChart() {
+    const btn = document.querySelector('[onclick="updateHighwaysChart()"]');
+    if (btn) {
+      btn.classList.add('rotating');
+    }
+    
+    try {
+      await this.updateDangerousHighwaysChart();
+      this.showNotification('Gráfico de rodovias atualizado!', 'success');
+    } catch (error) {
+      this.showNotification('Erro ao atualizar gráfico de rodovias', 'error');
+    } finally {
+      if (btn) {
+        setTimeout(() => btn.classList.remove('rotating'), 1000);
+      }
+    }
+  }
 }
 
 // Notification styles
@@ -2507,6 +2871,19 @@ const notificationStyles = `
 const styleSheet = document.createElement('style');
 styleSheet.textContent = notificationStyles;
 document.head.appendChild(styleSheet);
+
+// Funções globais para os botões HTML
+window.updateRiskCharts = function() {
+  if (window.sompoApp) {
+    window.sompoApp.updateRiskCharts();
+  }
+};
+
+window.updateHighwaysChart = function() {
+  if (window.sompoApp) {
+    window.sompoApp.updateHighwaysChart();
+  }
+};
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

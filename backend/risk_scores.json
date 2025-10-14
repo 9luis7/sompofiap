@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-10-14T00:19:48.984582",
+    "generated_at": "2025-10-14T08:05:57.579297",
     "total_segments": 4997,
     "total_accidents_analyzed": 47192,
     "model_type": "LightGBM",

@@ -1,0 +1,1688 @@
+{
+  "SP": [
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 0.3,
+      "max_km": 568.0,
+      "accidents": 2096,
+      "length_km": 567.7
+    },
+    {
+      "br": "381",
+      "name": "BR-381 (Fernão Dias)",
+      "min_km": 0.4,
+      "max_km": 90.0,
+      "accidents": 425,
+      "length_km": 89.6
+    },
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 0.3,
+      "max_km": 347.0,
+      "accidents": 301,
+      "length_km": 346.7
+    },
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 1.0,
+      "max_km": 52.0,
+      "accidents": 172,
+      "length_km": 51.0
+    },
+    {
+      "br": "459",
+      "name": "BR-459",
+      "min_km": 1.0,
+      "max_km": 32.0,
+      "accidents": 18,
+      "length_km": 31.0
+    },
+    {
+      "br": "488",
+      "name": "BR-488",
+      "min_km": 1.0,
+      "max_km": 5.5,
+      "accidents": 12,
+      "length_km": 4.5
+    },
+    {
+      "br": "262",
+      "name": "BR-262 (Litoral Sudeste)",
+      "min_km": 319.0,
+      "max_km": 321.6,
+      "accidents": 5,
+      "length_km": 2.6
+    }
+  ],
+  "CE": [
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 0.1,
+      "max_km": 547.0,
+      "accidents": 525,
+      "length_km": 546.9
+    },
+    {
+      "br": "222",
+      "name": "BR-222 (Maranhão-Piauí)",
+      "min_km": 0.1,
+      "max_km": 339.0,
+      "accidents": 270,
+      "length_km": 338.9
+    },
+    {
+      "br": "20",
+      "name": "BR-20",
+      "min_km": 1.7,
+      "max_km": 406.0,
+      "accidents": 96,
+      "length_km": 404.3
+    },
+    {
+      "br": "304",
+      "name": "BR-304",
+      "min_km": 6.1,
+      "max_km": 99.0,
+      "accidents": 33,
+      "length_km": 92.9
+    },
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 2.2,
+      "max_km": 113.0,
+      "accidents": 16,
+      "length_km": 110.8
+    },
+    {
+      "br": "402",
+      "name": "BR-402",
+      "min_km": 185.2,
+      "max_km": 299.1,
+      "accidents": 10,
+      "length_km": 113.9
+    },
+    {
+      "br": "403",
+      "name": "BR-403",
+      "min_km": 6.8,
+      "max_km": 146.9,
+      "accidents": 5,
+      "length_km": 140.1
+    }
+  ],
+  "PR": [
+    {
+      "br": "277",
+      "name": "BR-277 (Paraná)",
+      "min_km": 0.1,
+      "max_km": 730.5,
+      "accidents": 1394,
+      "length_km": 730.4
+    },
+    {
+      "br": "376",
+      "name": "BR-376 (Paraná)",
+      "min_km": 0.3,
+      "max_km": 682.0,
+      "accidents": 1079,
+      "length_km": 681.7
+    },
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 0.3,
+      "max_km": 211.3,
+      "accidents": 727,
+      "length_km": 211.0
+    },
+    {
+      "br": "369",
+      "name": "BR-369 (Paraná Interior)",
+      "min_km": 0.6,
+      "max_km": 508.0,
+      "accidents": 591,
+      "length_km": 507.4
+    },
+    {
+      "br": "476",
+      "name": "BR-476",
+      "min_km": 1.0,
+      "max_km": 358.0,
+      "accidents": 280,
+      "length_km": 357.0
+    },
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 1.0,
+      "max_km": 519.0,
+      "accidents": 277,
+      "length_km": 518.0
+    },
+    {
+      "br": "163",
+      "name": "BR-163 (Santarém-Cuiabá)",
+      "min_km": 2.0,
+      "max_km": 353.0,
+      "accidents": 238,
+      "length_km": 351.0
+    },
+    {
+      "br": "373",
+      "name": "BR-373",
+      "min_km": 171.9,
+      "max_km": 477.2,
+      "accidents": 154,
+      "length_km": 305.3
+    },
+    {
+      "br": "158",
+      "name": "BR-158",
+      "min_km": 224.0,
+      "max_km": 539.9,
+      "accidents": 70,
+      "length_km": 315.9
+    },
+    {
+      "br": "469",
+      "name": "BR-469",
+      "min_km": 1.0,
+      "max_km": 30.0,
+      "accidents": 34,
+      "length_km": 29.0
+    },
+    {
+      "br": "272",
+      "name": "BR-272",
+      "min_km": 366.4,
+      "max_km": 568.0,
+      "accidents": 32,
+      "length_km": 201.6
+    },
+    {
+      "br": "487",
+      "name": "BR-487",
+      "min_km": 11.8,
+      "max_km": 178.3,
+      "accidents": 29,
+      "length_km": 166.5
+    },
+    {
+      "br": "467",
+      "name": "BR-467",
+      "min_km": 100.9,
+      "max_km": 110.5,
+      "accidents": 20,
+      "length_km": 9.6
+    },
+    {
+      "br": "280",
+      "name": "BR-280",
+      "min_km": 257.5,
+      "max_km": 310.9,
+      "accidents": 14,
+      "length_km": 53.4
+    }
+  ],
+  "MG": [
+    {
+      "br": "381",
+      "name": "BR-381 (Fernão Dias)",
+      "min_km": 0.2,
+      "max_km": 949.0,
+      "accidents": 1759,
+      "length_km": 948.8
+    },
+    {
+      "br": "40",
+      "name": "BR-40",
+      "min_km": 14.0,
+      "max_km": 827.5,
+      "accidents": 1295,
+      "length_km": 813.5
+    },
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 4.5,
+      "max_km": 816.4,
+      "accidents": 900,
+      "length_km": 811.9
+    },
+    {
+      "br": "262",
+      "name": "BR-262 (Litoral Sudeste)",
+      "min_km": 0.4,
+      "max_km": 913.1,
+      "accidents": 700,
+      "length_km": 912.7
+    },
+    {
+      "br": "50",
+      "name": "BR-50",
+      "min_km": 0.2,
+      "max_km": 206.0,
+      "accidents": 408,
+      "length_km": 205.8
+    },
+    {
+      "br": "365",
+      "name": "BR-365 (Minas Gerais)",
+      "min_km": 0.1,
+      "max_km": 868.1,
+      "accidents": 405,
+      "length_km": 868.0
+    },
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 0.5,
+      "max_km": 244.5,
+      "accidents": 187,
+      "length_km": 244.0
+    },
+    {
+      "br": "251",
+      "name": "BR-251 (Conectividade Regional)",
+      "min_km": 204.0,
+      "max_km": 522.2,
+      "accidents": 173,
+      "length_km": 318.2
+    },
+    {
+      "br": "267",
+      "name": "BR-267",
+      "min_km": 8.5,
+      "max_km": 302.0,
+      "accidents": 87,
+      "length_km": 293.5
+    },
+    {
+      "br": "459",
+      "name": "BR-459",
+      "min_km": 12.0,
+      "max_km": 101.0,
+      "accidents": 76,
+      "length_km": 89.0
+    },
+    {
+      "br": "354",
+      "name": "BR-354",
+      "min_km": 239.6,
+      "max_km": 771.4,
+      "accidents": 71,
+      "length_km": 531.8
+    },
+    {
+      "br": "356",
+      "name": "BR-356 (Rio de Janeiro)",
+      "min_km": 264.4,
+      "max_km": 283.2,
+      "accidents": 40,
+      "length_km": 18.8
+    },
+    {
+      "br": "146",
+      "name": "BR-146",
+      "min_km": 11.3,
+      "max_km": 488.1,
+      "accidents": 36,
+      "length_km": 476.8
+    },
+    {
+      "br": "364",
+      "name": "BR-364 (Cuiabá-Porto Velho)",
+      "min_km": 0.8,
+      "max_km": 34.8,
+      "accidents": 28,
+      "length_km": 34.0
+    }
+  ],
+  "MT": [
+    {
+      "br": "163",
+      "name": "BR-163 (Santarém-Cuiabá)",
+      "min_km": 0.5,
+      "max_km": 1111.0,
+      "accidents": 653,
+      "length_km": 1110.5
+    },
+    {
+      "br": "364",
+      "name": "BR-364 (Cuiabá-Porto Velho)",
+      "min_km": 0.8,
+      "max_km": 1257.0,
+      "accidents": 472,
+      "length_km": 1256.2
+    },
+    {
+      "br": "70",
+      "name": "BR-70",
+      "min_km": 0.1,
+      "max_km": 795.0,
+      "accidents": 387,
+      "length_km": 794.9
+    },
+    {
+      "br": "174",
+      "name": "BR-174",
+      "min_km": 0.2,
+      "max_km": 584.0,
+      "accidents": 138,
+      "length_km": 583.8
+    },
+    {
+      "br": "158",
+      "name": "BR-158",
+      "min_km": 1.8,
+      "max_km": 796.0,
+      "accidents": 83,
+      "length_km": 794.2
+    }
+  ],
+  "RS": [
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 0.1,
+      "max_km": 659.0,
+      "accidents": 859,
+      "length_km": 658.9
+    },
+    {
+      "br": "290",
+      "name": "BR-290 (Transbrasiliana Sul)",
+      "min_km": 0.2,
+      "max_km": 725.0,
+      "accidents": 539,
+      "length_km": 724.8
+    },
+    {
+      "br": "386",
+      "name": "BR-386 (Rio Grande do Sul)",
+      "min_km": 2.0,
+      "max_km": 443.0,
+      "accidents": 403,
+      "length_km": 441.0
+    },
+    {
+      "br": "285",
+      "name": "BR-285",
+      "min_km": 5.0,
+      "max_km": 673.7,
+      "accidents": 269,
+      "length_km": 668.7
+    },
+    {
+      "br": "392",
+      "name": "BR-392",
+      "min_km": 0.2,
+      "max_km": 717.9,
+      "accidents": 232,
+      "length_km": 717.7
+    },
+    {
+      "br": "470",
+      "name": "BR-470",
+      "min_km": 1.4,
+      "max_km": 346.7,
+      "accidents": 216,
+      "length_km": 345.3
+    },
+    {
+      "br": "158",
+      "name": "BR-158",
+      "min_km": 1.0,
+      "max_km": 567.0,
+      "accidents": 182,
+      "length_km": 566.0
+    },
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 0.3,
+      "max_km": 686.0,
+      "accidents": 96,
+      "length_km": 685.7
+    },
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 0.2,
+      "max_km": 87.0,
+      "accidents": 95,
+      "length_km": 86.8
+    },
+    {
+      "br": "293",
+      "name": "BR-293",
+      "min_km": 0.2,
+      "max_km": 524.2,
+      "accidents": 82,
+      "length_km": 524.0
+    },
+    {
+      "br": "287",
+      "name": "BR-287 (Rio Grande do Sul)",
+      "min_km": 247.5,
+      "max_km": 528.0,
+      "accidents": 76,
+      "length_km": 280.5
+    },
+    {
+      "br": "472",
+      "name": "BR-472",
+      "min_km": 118.9,
+      "max_km": 655.5,
+      "accidents": 72,
+      "length_km": 536.6
+    },
+    {
+      "br": "471",
+      "name": "BR-471",
+      "min_km": 148.9,
+      "max_km": 679.0,
+      "accidents": 58,
+      "length_km": 530.1
+    },
+    {
+      "br": "448",
+      "name": "BR-448",
+      "min_km": 0.1,
+      "max_km": 22.0,
+      "accidents": 58,
+      "length_km": 21.9
+    },
+    {
+      "br": "468",
+      "name": "BR-468",
+      "min_km": 0.8,
+      "max_km": 131.3,
+      "accidents": 28,
+      "length_km": 130.5
+    },
+    {
+      "br": "480",
+      "name": "BR-480",
+      "min_km": 64.7,
+      "max_km": 68.0,
+      "accidents": 6,
+      "length_km": 3.3
+    }
+  ],
+  "SC": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 0.8,
+      "max_km": 463.0,
+      "accidents": 2740,
+      "length_km": 462.2
+    },
+    {
+      "br": "282",
+      "name": "BR-282 (Santa Catarina)",
+      "min_km": 0.1,
+      "max_km": 674.6,
+      "accidents": 865,
+      "length_km": 674.5
+    },
+    {
+      "br": "470",
+      "name": "BR-470",
+      "min_km": 0.1,
+      "max_km": 353.6,
+      "accidents": 709,
+      "length_km": 353.5
+    },
+    {
+      "br": "280",
+      "name": "BR-280",
+      "min_km": 1.0,
+      "max_km": 305.0,
+      "accidents": 587,
+      "length_km": 304.0
+    },
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 0.2,
+      "max_km": 308.5,
+      "accidents": 229,
+      "length_km": 308.3
+    },
+    {
+      "br": "163",
+      "name": "BR-163 (Santarém-Cuiabá)",
+      "min_km": 0.5,
+      "max_km": 122.5,
+      "accidents": 79,
+      "length_km": 122.0
+    },
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 0.6,
+      "max_km": 117.8,
+      "accidents": 44,
+      "length_km": 117.2
+    },
+    {
+      "br": "480",
+      "name": "BR-480",
+      "min_km": 123.0,
+      "max_km": 132.0,
+      "accidents": 36,
+      "length_km": 9.0
+    },
+    {
+      "br": "158",
+      "name": "BR-158",
+      "min_km": 102.3,
+      "max_km": 142.0,
+      "accidents": 27,
+      "length_km": 39.7
+    }
+  ],
+  "PE": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 3.0,
+      "max_km": 211.0,
+      "accidents": 698,
+      "length_km": 208.0
+    },
+    {
+      "br": "232",
+      "name": "BR-232 (Pernambuco)",
+      "min_km": 4.0,
+      "max_km": 551.0,
+      "accidents": 544,
+      "length_km": 547.0
+    },
+    {
+      "br": "104",
+      "name": "BR-104",
+      "min_km": 4.1,
+      "max_km": 135.0,
+      "accidents": 138,
+      "length_km": 130.9
+    },
+    {
+      "br": "428",
+      "name": "BR-428",
+      "min_km": 0.7,
+      "max_km": 192.2,
+      "accidents": 127,
+      "length_km": 191.5
+    },
+    {
+      "br": "407",
+      "name": "BR-407 (Pernambuco)",
+      "min_km": 7.4,
+      "max_km": 130.0,
+      "accidents": 88,
+      "length_km": 122.6
+    },
+    {
+      "br": "408",
+      "name": "BR-408",
+      "min_km": 15.1,
+      "max_km": 98.3,
+      "accidents": 88,
+      "length_km": 83.2
+    },
+    {
+      "br": "423",
+      "name": "BR-423",
+      "min_km": 22.0,
+      "max_km": 187.0,
+      "accidents": 81,
+      "length_km": 165.0
+    },
+    {
+      "br": "316",
+      "name": "BR-316",
+      "min_km": 11.5,
+      "max_km": 366.0,
+      "accidents": 57,
+      "length_km": 354.5
+    },
+    {
+      "br": "424",
+      "name": "BR-424",
+      "min_km": 0.7,
+      "max_km": 117.0,
+      "accidents": 42,
+      "length_km": 116.3
+    },
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 6.4,
+      "max_km": 84.0,
+      "accidents": 33,
+      "length_km": 77.6
+    },
+    {
+      "br": "110",
+      "name": "BR-110",
+      "min_km": 99.0,
+      "max_km": 255.0,
+      "accidents": 8,
+      "length_km": 156.0
+    }
+  ],
+  "PB": [
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 0.5,
+      "max_km": 516.0,
+      "accidents": 822,
+      "length_km": 515.5
+    },
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 1.7,
+      "max_km": 127.0,
+      "accidents": 339,
+      "length_km": 125.3
+    },
+    {
+      "br": "104",
+      "name": "BR-104",
+      "min_km": 2.0,
+      "max_km": 196.5,
+      "accidents": 118,
+      "length_km": 194.5
+    },
+    {
+      "br": "412",
+      "name": "BR-412",
+      "min_km": 12.0,
+      "max_km": 144.9,
+      "accidents": 21,
+      "length_km": 132.9
+    },
+    {
+      "br": "361",
+      "name": "BR-361",
+      "min_km": 3.6,
+      "max_km": 112.0,
+      "accidents": 21,
+      "length_km": 108.4
+    },
+    {
+      "br": "405",
+      "name": "BR-405 (Paraíba)",
+      "min_km": 0.2,
+      "max_km": 51.8,
+      "accidents": 11,
+      "length_km": 51.6
+    },
+    {
+      "br": "427",
+      "name": "BR-427",
+      "min_km": 3.6,
+      "max_km": 37.8,
+      "accidents": 8,
+      "length_km": 34.2
+    },
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 5.0,
+      "max_km": 12.0,
+      "accidents": 8,
+      "length_km": 7.0
+    }
+  ],
+  "ES": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 2.0,
+      "max_km": 461.0,
+      "accidents": 1399,
+      "length_km": 459.0
+    },
+    {
+      "br": "262",
+      "name": "BR-262 (Litoral Sudeste)",
+      "min_km": 0.1,
+      "max_km": 195.0,
+      "accidents": 221,
+      "length_km": 194.9
+    },
+    {
+      "br": "259",
+      "name": "BR-259",
+      "min_km": 8.0,
+      "max_km": 104.0,
+      "accidents": 73,
+      "length_km": 96.0
+    },
+    {
+      "br": "393",
+      "name": "BR-393 (Rio de Janeiro)",
+      "min_km": 0.3,
+      "max_km": 36.3,
+      "accidents": 19,
+      "length_km": 36.0
+    }
+  ],
+  "RJ": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 0.5,
+      "max_km": 594.2,
+      "accidents": 1493,
+      "length_km": 593.7
+    },
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 2.0,
+      "max_km": 339.0,
+      "accidents": 1148,
+      "length_km": 337.0
+    },
+    {
+      "br": "40",
+      "name": "BR-40",
+      "min_km": 3.0,
+      "max_km": 125.0,
+      "accidents": 656,
+      "length_km": 122.0
+    },
+    {
+      "br": "493",
+      "name": "BR-493",
+      "min_km": 0.5,
+      "max_km": 123.0,
+      "accidents": 242,
+      "length_km": 122.5
+    },
+    {
+      "br": "393",
+      "name": "BR-393 (Rio de Janeiro)",
+      "min_km": 2.0,
+      "max_km": 298.0,
+      "accidents": 217,
+      "length_km": 296.0
+    },
+    {
+      "br": "465",
+      "name": "BR-465",
+      "min_km": 1.0,
+      "max_km": 22.5,
+      "accidents": 170,
+      "length_km": 21.5
+    },
+    {
+      "br": "356",
+      "name": "BR-356 (Rio de Janeiro)",
+      "min_km": 1.6,
+      "max_km": 187.0,
+      "accidents": 93,
+      "length_km": 185.4
+    },
+    {
+      "br": "495",
+      "name": "BR-495",
+      "min_km": 0.1,
+      "max_km": 32.0,
+      "accidents": 21,
+      "length_km": 31.9
+    }
+  ],
+  "MA": [
+    {
+      "br": "135",
+      "name": "BR-135 (Maranhão)",
+      "min_km": 1.0,
+      "max_km": 385.6,
+      "accidents": 211,
+      "length_km": 384.6
+    },
+    {
+      "br": "316",
+      "name": "BR-316",
+      "min_km": 0.2,
+      "max_km": 620.0,
+      "accidents": 153,
+      "length_km": 619.8
+    },
+    {
+      "br": "10",
+      "name": "BR-10",
+      "min_km": 35.7,
+      "max_km": 376.7,
+      "accidents": 126,
+      "length_km": 341.0
+    },
+    {
+      "br": "222",
+      "name": "BR-222 (Maranhão-Piauí)",
+      "min_km": 116.0,
+      "max_km": 673.9,
+      "accidents": 88,
+      "length_km": 557.9
+    },
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 0.6,
+      "max_km": 570.0,
+      "accidents": 72,
+      "length_km": 569.4
+    },
+    {
+      "br": "226",
+      "name": "BR-226",
+      "min_km": 0.1,
+      "max_km": 520.4,
+      "accidents": 66,
+      "length_km": 520.3
+    },
+    {
+      "br": "402",
+      "name": "BR-402",
+      "min_km": 1.0,
+      "max_km": 141.0,
+      "accidents": 13,
+      "length_km": 140.0
+    }
+  ],
+  "TO": [
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 6.0,
+      "max_km": 799.3,
+      "accidents": 323,
+      "length_km": 793.3
+    },
+    {
+      "br": "10",
+      "name": "BR-10",
+      "min_km": 453.0,
+      "max_km": 520.0,
+      "accidents": 76,
+      "length_km": 67.0
+    },
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 1.8,
+      "max_km": 144.0,
+      "accidents": 17,
+      "length_km": 142.2
+    },
+    {
+      "br": "242",
+      "name": "BR-242",
+      "min_km": 283.5,
+      "max_km": 474.0,
+      "accidents": 17,
+      "length_km": 190.5
+    },
+    {
+      "br": "235",
+      "name": "BR-235",
+      "min_km": 163.0,
+      "max_km": 198.0,
+      "accidents": 8,
+      "length_km": 35.0
+    },
+    {
+      "br": "226",
+      "name": "BR-226",
+      "min_km": 2.0,
+      "max_km": 70.0,
+      "accidents": 5,
+      "length_km": 68.0
+    }
+  ],
+  "PI": [
+    {
+      "br": "343",
+      "name": "BR-343",
+      "min_km": 0.2,
+      "max_km": 647.0,
+      "accidents": 479,
+      "length_km": 646.8
+    },
+    {
+      "br": "316",
+      "name": "BR-316",
+      "min_km": 1.0,
+      "max_km": 415.0,
+      "accidents": 288,
+      "length_km": 414.0
+    },
+    {
+      "br": "135",
+      "name": "BR-135 (Maranhão)",
+      "min_km": 49.5,
+      "max_km": 640.0,
+      "accidents": 74,
+      "length_km": 590.5
+    },
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 15.6,
+      "max_km": 310.0,
+      "accidents": 58,
+      "length_km": 294.4
+    },
+    {
+      "br": "407",
+      "name": "BR-407 (Pernambuco)",
+      "min_km": 424.7,
+      "max_km": 607.0,
+      "accidents": 23,
+      "length_km": 182.3
+    },
+    {
+      "br": "222",
+      "name": "BR-222 (Maranhão-Piauí)",
+      "min_km": 1.0,
+      "max_km": 144.6,
+      "accidents": 22,
+      "length_km": 143.6
+    },
+    {
+      "br": "402",
+      "name": "BR-402",
+      "min_km": 3.0,
+      "max_km": 94.1,
+      "accidents": 13,
+      "length_km": 91.1
+    }
+  ],
+  "GO": [
+    {
+      "br": "153",
+      "name": "BR-153 (Transbrasiliana)",
+      "min_km": 2.7,
+      "max_km": 703.5,
+      "accidents": 637,
+      "length_km": 700.8
+    },
+    {
+      "br": "60",
+      "name": "BR-60",
+      "min_km": 0.4,
+      "max_km": 492.0,
+      "accidents": 491,
+      "length_km": 491.6
+    },
+    {
+      "br": "40",
+      "name": "BR-40",
+      "min_km": 0.9,
+      "max_km": 154.3,
+      "accidents": 208,
+      "length_km": 153.4
+    },
+    {
+      "br": "70",
+      "name": "BR-70",
+      "min_km": 0.6,
+      "max_km": 475.0,
+      "accidents": 142,
+      "length_km": 474.4
+    },
+    {
+      "br": "414",
+      "name": "BR-414",
+      "min_km": 210.0,
+      "max_km": 440.1,
+      "accidents": 106,
+      "length_km": 230.1
+    },
+    {
+      "br": "20",
+      "name": "BR-20",
+      "min_km": 0.1,
+      "max_km": 244.5,
+      "accidents": 103,
+      "length_km": 244.4
+    },
+    {
+      "br": "50",
+      "name": "BR-50",
+      "min_km": 95.0,
+      "max_km": 314.1,
+      "accidents": 100,
+      "length_km": 219.1
+    },
+    {
+      "br": "364",
+      "name": "BR-364 (Cuiabá-Porto Velho)",
+      "min_km": 2.9,
+      "max_km": 386.0,
+      "accidents": 83,
+      "length_km": 383.1
+    },
+    {
+      "br": "452",
+      "name": "BR-452",
+      "min_km": 0.1,
+      "max_km": 194.0,
+      "accidents": 64,
+      "length_km": 193.9
+    },
+    {
+      "br": "80",
+      "name": "BR-80",
+      "min_km": 0.4,
+      "max_km": 298.0,
+      "accidents": 49,
+      "length_km": 297.6
+    },
+    {
+      "br": "158",
+      "name": "BR-158",
+      "min_km": 8.0,
+      "max_km": 243.0,
+      "accidents": 31,
+      "length_km": 235.0
+    },
+    {
+      "br": "251",
+      "name": "BR-251 (Conectividade Regional)",
+      "min_km": 13.0,
+      "max_km": 31.0,
+      "accidents": 9,
+      "length_km": 18.0
+    }
+  ],
+  "BA": [
+    {
+      "br": "116",
+      "name": "BR-116 (Régis Bittencourt)",
+      "min_km": 0.1,
+      "max_km": 933.0,
+      "accidents": 677,
+      "length_km": 932.9
+    },
+    {
+      "br": "324",
+      "name": "BR-324",
+      "min_km": 0.3,
+      "max_km": 626.0,
+      "accidents": 652,
+      "length_km": 625.7
+    },
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 0.1,
+      "max_km": 951.0,
+      "accidents": 640,
+      "length_km": 950.9
+    },
+    {
+      "br": "242",
+      "name": "BR-242",
+      "min_km": 140.0,
+      "max_km": 928.0,
+      "accidents": 152,
+      "length_km": 788.0
+    },
+    {
+      "br": "110",
+      "name": "BR-110",
+      "min_km": 0.5,
+      "max_km": 399.0,
+      "accidents": 134,
+      "length_km": 398.5
+    },
+    {
+      "br": "407",
+      "name": "BR-407 (Pernambuco)",
+      "min_km": 0.4,
+      "max_km": 230.0,
+      "accidents": 87,
+      "length_km": 229.6
+    },
+    {
+      "br": "367",
+      "name": "BR-367",
+      "min_km": 6.0,
+      "max_km": 84.0,
+      "accidents": 86,
+      "length_km": 78.0
+    },
+    {
+      "br": "235",
+      "name": "BR-235",
+      "min_km": 3.0,
+      "max_km": 389.0,
+      "accidents": 52,
+      "length_km": 386.0
+    },
+    {
+      "br": "415",
+      "name": "BR-415",
+      "min_km": 19.0,
+      "max_km": 61.0,
+      "accidents": 42,
+      "length_km": 42.0
+    },
+    {
+      "br": "135",
+      "name": "BR-135 (Maranhão)",
+      "min_km": 31.0,
+      "max_km": 445.0,
+      "accidents": 40,
+      "length_km": 414.0
+    },
+    {
+      "br": "20",
+      "name": "BR-20",
+      "min_km": 2.0,
+      "max_km": 251.0,
+      "accidents": 37,
+      "length_km": 249.0
+    },
+    {
+      "br": "349",
+      "name": "BR-349",
+      "min_km": 822.0,
+      "max_km": 1100.0,
+      "accidents": 37,
+      "length_km": 278.0
+    },
+    {
+      "br": "330",
+      "name": "BR-330",
+      "min_km": 788.8,
+      "max_km": 889.9,
+      "accidents": 35,
+      "length_km": 101.1
+    },
+    {
+      "br": "418",
+      "name": "BR-418",
+      "min_km": 8.4,
+      "max_km": 123.0,
+      "accidents": 21,
+      "length_km": 114.6
+    },
+    {
+      "br": "420",
+      "name": "BR-420",
+      "min_km": 233.0,
+      "max_km": 346.3,
+      "accidents": 20,
+      "length_km": 113.3
+    },
+    {
+      "br": "410",
+      "name": "BR-410",
+      "min_km": 1.0,
+      "max_km": 35.0,
+      "accidents": 16,
+      "length_km": 34.0
+    }
+  ],
+  "RO": [
+    {
+      "br": "364",
+      "name": "BR-364 (Cuiabá-Porto Velho)",
+      "min_km": 1.0,
+      "max_km": 1069.0,
+      "accidents": 716,
+      "length_km": 1068.0
+    },
+    {
+      "br": "319",
+      "name": "BR-319",
+      "min_km": 10.0,
+      "max_km": 144.0,
+      "accidents": 87,
+      "length_km": 134.0
+    },
+    {
+      "br": "435",
+      "name": "BR-435",
+      "min_km": 25.0,
+      "max_km": 130.5,
+      "accidents": 42,
+      "length_km": 105.5
+    },
+    {
+      "br": "174",
+      "name": "BR-174",
+      "min_km": 11.0,
+      "max_km": 64.3,
+      "accidents": 28,
+      "length_km": 53.3
+    },
+    {
+      "br": "425",
+      "name": "BR-425",
+      "min_km": 29.0,
+      "max_km": 128.5,
+      "accidents": 23,
+      "length_km": 99.5
+    },
+    {
+      "br": "429",
+      "name": "BR-429 (Rondônia)",
+      "min_km": 7.0,
+      "max_km": 203.0,
+      "accidents": 21,
+      "length_km": 196.0
+    },
+    {
+      "br": "421",
+      "name": "BR-421",
+      "min_km": 0.1,
+      "max_km": 79.0,
+      "accidents": 17,
+      "length_km": 78.9
+    }
+  ],
+  "MS": [
+    {
+      "br": "163",
+      "name": "BR-163 (Santarém-Cuiabá)",
+      "min_km": 0.2,
+      "max_km": 843.0,
+      "accidents": 514,
+      "length_km": 842.8
+    },
+    {
+      "br": "262",
+      "name": "BR-262 (Litoral Sudeste)",
+      "min_km": 2.0,
+      "max_km": 777.0,
+      "accidents": 197,
+      "length_km": 775.0
+    },
+    {
+      "br": "60",
+      "name": "BR-60",
+      "min_km": 28.0,
+      "max_km": 670.0,
+      "accidents": 101,
+      "length_km": 642.0
+    },
+    {
+      "br": "267",
+      "name": "BR-267",
+      "min_km": 5.2,
+      "max_km": 668.6,
+      "accidents": 93,
+      "length_km": 663.4
+    },
+    {
+      "br": "158",
+      "name": "BR-158",
+      "min_km": 2.0,
+      "max_km": 338.4,
+      "accidents": 86,
+      "length_km": 336.4
+    },
+    {
+      "br": "463",
+      "name": "BR-463",
+      "min_km": 0.3,
+      "max_km": 110.0,
+      "accidents": 39,
+      "length_km": 109.7
+    },
+    {
+      "br": "376",
+      "name": "BR-376 (Paraná)",
+      "min_km": 3.0,
+      "max_km": 172.0,
+      "accidents": 38,
+      "length_km": 169.0
+    },
+    {
+      "br": "419",
+      "name": "BR-419",
+      "min_km": 16.0,
+      "max_km": 326.0,
+      "accidents": 10,
+      "length_km": 310.0
+    }
+  ],
+  "SE": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 1.0,
+      "max_km": 206.0,
+      "accidents": 214,
+      "length_km": 205.0
+    },
+    {
+      "br": "235",
+      "name": "BR-235",
+      "min_km": 0.3,
+      "max_km": 112.0,
+      "accidents": 153,
+      "length_km": 111.7
+    }
+  ],
+  "DF": [
+    {
+      "br": "20",
+      "name": "BR-20",
+      "min_km": 0.8,
+      "max_km": 58.7,
+      "accidents": 223,
+      "length_km": 57.9
+    },
+    {
+      "br": "70",
+      "name": "BR-70",
+      "min_km": 0.4,
+      "max_km": 19.4,
+      "accidents": 189,
+      "length_km": 19.0
+    },
+    {
+      "br": "40",
+      "name": "BR-40",
+      "min_km": 0.1,
+      "max_km": 8.0,
+      "accidents": 83,
+      "length_km": 7.9
+    },
+    {
+      "br": "60",
+      "name": "BR-60",
+      "min_km": 0.3,
+      "max_km": 31.0,
+      "accidents": 78,
+      "length_km": 30.7
+    },
+    {
+      "br": "251",
+      "name": "BR-251 (Conectividade Regional)",
+      "min_km": 1.0,
+      "max_km": 60.9,
+      "accidents": 39,
+      "length_km": 59.9
+    },
+    {
+      "br": "80",
+      "name": "BR-80",
+      "min_km": 2.0,
+      "max_km": 34.8,
+      "accidents": 37,
+      "length_km": 32.8
+    }
+  ],
+  "RR": [
+    {
+      "br": "174",
+      "name": "BR-174",
+      "min_km": 8.8,
+      "max_km": 711.0,
+      "accidents": 49,
+      "length_km": 702.2
+    },
+    {
+      "br": "401",
+      "name": "BR-401",
+      "min_km": 3.2,
+      "max_km": 136.0,
+      "accidents": 28,
+      "length_km": 132.8
+    },
+    {
+      "br": "432",
+      "name": "BR-432",
+      "min_km": 69.0,
+      "max_km": 211.0,
+      "accidents": 19,
+      "length_km": 142.0
+    }
+  ],
+  "RN": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 0.7,
+      "max_km": 176.0,
+      "accidents": 434,
+      "length_km": 175.3
+    },
+    {
+      "br": "304",
+      "name": "BR-304",
+      "min_km": 1.0,
+      "max_km": 306.4,
+      "accidents": 257,
+      "length_km": 305.4
+    },
+    {
+      "br": "226",
+      "name": "BR-226",
+      "min_km": 1.0,
+      "max_km": 361.8,
+      "accidents": 113,
+      "length_km": 360.8
+    },
+    {
+      "br": "110",
+      "name": "BR-110",
+      "min_km": 1.0,
+      "max_km": 126.9,
+      "accidents": 80,
+      "length_km": 125.9
+    },
+    {
+      "br": "406",
+      "name": "BR-406",
+      "min_km": 0.9,
+      "max_km": 171.3,
+      "accidents": 78,
+      "length_km": 170.4
+    },
+    {
+      "br": "405",
+      "name": "BR-405 (Paraíba)",
+      "min_km": 0.3,
+      "max_km": 188.0,
+      "accidents": 54,
+      "length_km": 187.7
+    },
+    {
+      "br": "427",
+      "name": "BR-427",
+      "min_km": 2.7,
+      "max_km": 135.8,
+      "accidents": 26,
+      "length_km": 133.1
+    }
+  ],
+  "AL": [
+    {
+      "br": "101",
+      "name": "BR-101 (Rio-Santos)",
+      "min_km": 1.3,
+      "max_km": 247.5,
+      "accidents": 184,
+      "length_km": 246.2
+    },
+    {
+      "br": "316",
+      "name": "BR-316",
+      "min_km": 45.0,
+      "max_km": 270.8,
+      "accidents": 121,
+      "length_km": 225.8
+    },
+    {
+      "br": "104",
+      "name": "BR-104",
+      "min_km": 2.5,
+      "max_km": 93.5,
+      "accidents": 83,
+      "length_km": 91.0
+    },
+    {
+      "br": "423",
+      "name": "BR-423",
+      "min_km": 4.2,
+      "max_km": 105.0,
+      "accidents": 30,
+      "length_km": 100.8
+    },
+    {
+      "br": "416",
+      "name": "BR-416",
+      "min_km": 2.1,
+      "max_km": 48.0,
+      "accidents": 8,
+      "length_km": 45.9
+    },
+    {
+      "br": "424",
+      "name": "BR-424",
+      "min_km": 91.6,
+      "max_km": 103.0,
+      "accidents": 8,
+      "length_km": 11.4
+    }
+  ],
+  "PA": [
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 2.0,
+      "max_km": 1230.0,
+      "accidents": 179,
+      "length_km": 1228.0
+    },
+    {
+      "br": "316",
+      "name": "BR-316",
+      "min_km": 13.0,
+      "max_km": 270.7,
+      "accidents": 169,
+      "length_km": 257.7
+    },
+    {
+      "br": "163",
+      "name": "BR-163 (Santarém-Cuiabá)",
+      "min_km": 1.0,
+      "max_km": 997.0,
+      "accidents": 158,
+      "length_km": 996.0
+    },
+    {
+      "br": "10",
+      "name": "BR-10",
+      "min_km": 1.1,
+      "max_km": 355.0,
+      "accidents": 102,
+      "length_km": 353.9
+    },
+    {
+      "br": "155",
+      "name": "BR-155",
+      "min_km": 64.0,
+      "max_km": 343.0,
+      "accidents": 33,
+      "length_km": 279.0
+    },
+    {
+      "br": "222",
+      "name": "BR-222 (Maranhão-Piauí)",
+      "min_km": 18.0,
+      "max_km": 218.0,
+      "accidents": 27,
+      "length_km": 200.0
+    },
+    {
+      "br": "308",
+      "name": "BR-308",
+      "min_km": 152.0,
+      "max_km": 200.0,
+      "accidents": 15,
+      "length_km": 48.0
+    }
+  ],
+  "AC": [
+    {
+      "br": "364",
+      "name": "BR-364 (Cuiabá-Porto Velho)",
+      "min_km": 1.8,
+      "max_km": 527.0,
+      "accidents": 126,
+      "length_km": 525.2
+    },
+    {
+      "br": "317",
+      "name": "BR-317",
+      "min_km": 18.0,
+      "max_km": 346.0,
+      "accidents": 36,
+      "length_km": 328.0
+    }
+  ],
+  "AM": [
+    {
+      "br": "174",
+      "name": "BR-174",
+      "min_km": 885.0,
+      "max_km": 1130.0,
+      "accidents": 48,
+      "length_km": 245.0
+    },
+    {
+      "br": "230",
+      "name": "BR-230 (Transamazônica)",
+      "min_km": 459.0,
+      "max_km": 687.0,
+      "accidents": 18,
+      "length_km": 228.0
+    },
+    {
+      "br": "319",
+      "name": "BR-319",
+      "min_km": 0.5,
+      "max_km": 733.0,
+      "accidents": 15,
+      "length_km": 732.5
+    }
+  ],
+  "AP": [
+    {
+      "br": "210",
+      "name": "BR-210",
+      "min_km": 1.0,
+      "max_km": 129.0,
+      "accidents": 59,
+      "length_km": 128.0
+    },
+    {
+      "br": "156",
+      "name": "BR-156",
+      "min_km": 38.8,
+      "max_km": 800.0,
+      "accidents": 39,
+      "length_km": 761.2
+    }
+  ]
+}
