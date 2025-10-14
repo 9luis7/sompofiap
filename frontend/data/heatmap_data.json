@@ -1,0 +1,208 @@
+{
+  "metadata": {
+    "description": "Dados demo de acidentes para heatmap - São Paulo e região",
+    "source": "Dados simulados baseados em padrões reais de acidentes",
+    "last_updated": "2024-01-15",
+    "total_points": 150
+  },
+  "heatmap_points": [
+    {
+      "lat": -23.5505,
+      "lng": -46.6333,
+      "intensity": 0.9,
+      "description": "Centro de SP - Alto risco de acidentes",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5489,
+      "lng": -46.6388,
+      "intensity": 0.8,
+      "description": "Sé - Zona de alto tráfego",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5431,
+      "lng": -46.6291,
+      "intensity": 0.7,
+      "description": "República - Tráfego intenso",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5613,
+      "lng": -46.6565,
+      "intensity": 0.8,
+      "description": "Bela Vista - Zona comercial",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5476,
+      "lng": -46.6358,
+      "intensity": 0.6,
+      "description": "Liberdade - Tráfego moderado",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.4700,
+      "lng": -46.5500,
+      "intensity": 0.9,
+      "description": "Marginal Tietê - Alto risco rodoviário",
+      "type": "rodovia"
+    },
+    {
+      "lat": -23.5300,
+      "lng": -46.6200,
+      "intensity": 0.8,
+      "description": "Marginal Pinheiros - Alto tráfego",
+      "type": "rodovia"
+    },
+    {
+      "lat": -23.5800,
+      "lng": -46.6400,
+      "intensity": 0.7,
+      "description": "Av. Paulista - Tráfego intenso",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5000,
+      "lng": -46.5800,
+      "intensity": 0.8,
+      "description": "Rodovia dos Bandeirantes - Alto risco",
+      "type": "rodovia"
+    },
+    {
+      "lat": -23.5200,
+      "lng": -46.6000,
+      "intensity": 0.7,
+      "description": "Rodovia Anhanguera - Risco elevado",
+      "type": "rodovia"
+    },
+    {
+      "lat": -23.5200,
+      "lng": -46.4800,
+      "intensity": 0.6,
+      "description": "Zona Oeste - Risco moderado",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.4800,
+      "lng": -46.5800,
+      "intensity": 0.7,
+      "description": "Zona Sul - Tráfego pesado",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.6000,
+      "lng": -46.5200,
+      "intensity": 0.6,
+      "description": "Zona Leste - Risco moderado",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.4356,
+      "lng": -46.4731,
+      "intensity": 0.8,
+      "description": "Aeroporto de Cumbica - Alto tráfego",
+      "type": "aeroporto"
+    },
+    {
+      "lat": -23.6267,
+      "lng": -46.6553,
+      "intensity": 0.7,
+      "description": "Aeroporto de Congonhas - Tráfego intenso",
+      "type": "aeroporto"
+    },
+    {
+      "lat": -23.9500,
+      "lng": -46.3300,
+      "intensity": 0.9,
+      "description": "Porto de Santos - Alto risco logístico",
+      "type": "porto"
+    },
+    {
+      "lat": -23.9000,
+      "lng": -46.3800,
+      "intensity": 0.8,
+      "description": "Cubatão - Zona industrial",
+      "type": "industrial"
+    },
+    {
+      "lat": -23.5000,
+      "lng": -46.6200,
+      "intensity": 0.6,
+      "description": "Região ABC - Risco moderado",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5800,
+      "lng": -46.5800,
+      "intensity": 0.5,
+      "description": "Zona Norte - Risco baixo",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.4200,
+      "lng": -46.5300,
+      "intensity": 0.7,
+      "description": "Zona Oeste (expansão) - Tráfego crescente",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.4600,
+      "lng": -46.5400,
+      "intensity": 0.6,
+      "description": "Vila Madalena - Tráfego noturno",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5900,
+      "lng": -46.6800,
+      "intensity": 0.5,
+      "description": "Vila Olímpia - Baixo risco",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.5100,
+      "lng": -46.6500,
+      "intensity": 0.7,
+      "description": "Mooca - Zona industrial",
+      "type": "industrial"
+    },
+    {
+      "lat": -23.5400,
+      "lng": -46.5700,
+      "intensity": 0.6,
+      "description": "Santo André - Tráfego moderado",
+      "type": "urbano"
+    },
+    {
+      "lat": -23.4900,
+      "lng": -46.5900,
+      "intensity": 0.7,
+      "description": "São Bernardo - Risco elevado",
+      "type": "urbano"
+    }
+  ],
+  "risk_zones": [
+    {
+      "name": "Centro Histórico",
+      "center": [-23.5505, -46.6333],
+      "radius": 2000,
+      "risk_level": "alto",
+      "description": "Zona central com alto índice de acidentes"
+    },
+    {
+      "name": "Marginais",
+      "center": [-23.5000, -46.5850],
+      "radius": 5000,
+      "risk_level": "critico",
+      "description": "Marginais Tietê e Pinheiros - Alto risco"
+    },
+    {
+      "name": "Região Metropolitana",
+      "center": [-23.5200, -46.6200],
+      "radius": 15000,
+      "risk_level": "medio",
+      "description": "Grande São Paulo - Risco moderado a alto"
+    }
+  ]
+}

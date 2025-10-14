@@ -28,4 +28,16 @@ router.get('/statistics', riskPredictionController.getStatistics);
 // GET /api/v1/risk/status - Status do serviço
 router.get('/status', riskPredictionController.getStatus);
 
+// GET /api/v1/risk/zones - Zonas de risco (compatibilidade com frontend)
+router.get('/zones', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      zones: [],
+      total: 0,
+      message: 'Zonas de risco não implementadas ainda'
+    }
+  });
+});
+
 export default router;

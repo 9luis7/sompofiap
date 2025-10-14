@@ -292,8 +292,8 @@ class SompoApp {
     // Load dashboard data from API
     this.loadDashboardData();
 
-    // Initialize live alerts module
-    if (typeof LiveAlertsModule !== 'undefined') {
+    // Initialize live alerts module (apenas uma vez)
+    if (typeof LiveAlertsModule !== 'undefined' && !this.liveAlerts) {
       this.liveAlerts = new LiveAlertsModule(this);
       this.liveAlerts.initialize();
     }
@@ -622,8 +622,10 @@ class SompoApp {
 
   async addRiskHeatLayer() {
     if (!this.maps.full || typeof L === 'undefined' || typeof L.heatLayer === 'undefined') {
+      console.warn('Leaflet.heat plugin não está disponível');
       return;
     }
+    
     try {
       // Buscar dados reais de acidentes do backend
       const resp = await fetch(`${window.API_BASE_URL}/accidents/heatmap?years=3&limit=5000`);
@@ -632,12 +634,28 @@ class SompoApp {
       if (json.success && json.data && json.data.points && json.data.points.length > 0) {
         const points = json.data.points.map(p => [p.lat, p.lng, p.intensity || 0.5]);
 
-        const heat = L.heatLayer(points, {
-          radius: 18,
-          blur: 20,
-          maxZoom: 17,
-          minOpacity: 0.35,
-        });
+             // Criar heatmap com configurações otimizadas
+             const heat = L.heatLayer(points, {
+               radius: 25,        // Raio maior para melhor visualização
+               blur: 15,          // Blur moderado para suavizar
+               maxZoom: 17,       // Zoom máximo
+               minOpacity: 0.4,   // Opacidade mínima
+               gradient: {         // Gradiente customizado
+                 0.4: 'blue',      // Baixo risco - azul
+                 0.6: 'cyan',      // Risco moderado - ciano
+                 0.7: 'lime',      // Risco médio - verde limão
+                 0.8: 'yellow',    // Risco alto - amarelo
+                 0.9: 'orange',    // Risco muito alto - laranja
+                 1.0: 'red'        // Risco crítico - vermelho
+               }
+             });
+
+             // Otimizar canvas para leitura frequente
+             if (heat._canvas) {
+               heat._canvas.willReadFrequently = true;
+             }
+
+        // Adicionar ao mapa
         heat.addTo(this.maps.full);
 
         // Guardar referência para controle futuro
@@ -645,15 +663,121 @@ class SompoApp {
         this.mapLayers.riskHeat = heat;
 
         // Adicionar controles
-        this.addHeatmapToggleControl();
+        this.addHeatmapControls();
         this.addRiskLegendControl();
 
-        console.log(`Heatmap carregado com ${points.length} pontos de acidentes reais`);
+        console.log(`✅ Heatmap carregado com ${points.length} pontos de acidentes reais`);
+        
+        // Mostrar notificação de sucesso
+        this.showNotification(`Heatmap carregado: ${points.length} pontos de risco`, 'success');
       } else {
-        console.warn('Nenhum ponto de risco disponível no backend');
+        console.warn('Nenhum ponto de risco disponível no backend, usando dados demo');
+        // Fallback para dados demo se backend não tiver dados
+        this.addDemoHeatmapData();
       }
     } catch (error) {
       console.error('Erro ao carregar heatmap de acidentes:', error);
+      // Fallback para dados demo em caso de erro
+      this.addDemoHeatmapData();
+    }
+  }
+
+  /**
+   * Adiciona dados demo de heatmap quando backend não está disponível
+   */
+  async addDemoHeatmapData() {
+    if (!this.maps.full || typeof L === 'undefined' || typeof L.heatLayer === 'undefined') {
+      return;
+    }
+
+    try {
+      // Tentar carregar dados do arquivo JSON
+      const response = await fetch('data/heatmap_data.json');
+      let demoPoints;
+      
+      if (response.ok) {
+        const data = await response.json();
+        demoPoints = data.heatmap_points.map(point => [
+          point.lat, 
+          point.lng, 
+          point.intensity
+        ]);
+        console.log(`✅ Carregados ${demoPoints.length} pontos do arquivo demo`);
+      } else {
+        // Fallback para dados hardcoded
+        demoPoints = [
+          // Região Metropolitana de SP - pontos de alto risco
+          [-23.5505, -46.6333, 0.9],  // Centro SP
+          [-23.5489, -46.6388, 0.8],  // Sé
+          [-23.5431, -46.6291, 0.7],  // República
+          [-23.5613, -46.6565, 0.8],  // Bela Vista
+          [-23.5476, -46.6358, 0.6],  // Liberdade
+          
+          // Rodovias principais - alto risco
+          [-23.4700, -46.5500, 0.9],  // Marginal Tietê
+          [-23.5300, -46.6200, 0.8],  // Marginal Pinheiros
+          [-23.5800, -46.6400, 0.7],  // Av. Paulista
+          [-23.5000, -46.5800, 0.8],  // Rodovia dos Bandeirantes
+          [-23.5200, -46.6000, 0.7],  // Rodovia Anhanguera
+          
+          // Zonas industriais
+          [-23.5200, -46.4800, 0.6],  // Zona Oeste
+          [-23.4800, -46.5800, 0.7],  // Zona Sul
+          [-23.6000, -46.5200, 0.6],  // Zona Leste
+          
+          // Entornos de aeroportos
+          [-23.4356, -46.4731, 0.8],  // Aeroporto de Cumbica
+          [-23.6267, -46.6553, 0.7],  // Aeroporto de Congonhas
+          
+          // Portos e terminais
+          [-23.9500, -46.3300, 0.9],  // Porto de Santos
+          [-23.9000, -46.3800, 0.8],  // Cubatão
+          
+          // Outros pontos de risco conhecidos
+          [-23.5000, -46.6200, 0.6],  // Região ABC
+          [-23.5800, -46.5800, 0.5],  // Zona Norte
+          [-23.4200, -46.5300, 0.7],  // Zona Oeste (expansão)
+        ];
+        console.log('⚠️ Usando dados hardcoded como fallback');
+      }
+
+           const heat = L.heatLayer(demoPoints, {
+             radius: 30,
+             blur: 20,
+             maxZoom: 17,
+             minOpacity: 0.4,
+             gradient: {
+               0.4: '#0066cc',    // Azul - baixo risco
+               0.5: '#00cccc',    // Ciano - risco moderado
+               0.6: '#66ff66',    // Verde - risco médio
+               0.7: '#ffff00',    // Amarelo - risco alto
+               0.8: '#ff9900',    // Laranja - risco muito alto
+               0.9: '#ff3300',    // Vermelho - risco crítico
+               1.0: '#cc0000'     // Vermelho escuro - máximo risco
+             }
+           });
+
+           // Otimizar canvas para leitura frequente
+           if (heat._canvas) {
+             heat._canvas.willReadFrequently = true;
+           }
+
+           heat.addTo(this.maps.full);
+
+      // Guardar referência
+      this.mapLayers = this.mapLayers || {};
+      this.mapLayers.riskHeat = heat;
+
+      // Adicionar controles
+      this.addHeatmapControls();
+      this.addRiskLegendControl();
+
+      console.log(`✅ Heatmap demo carregado com ${demoPoints.length} pontos de São Paulo`);
+      this.showNotification(`Heatmap demo: ${demoPoints.length} pontos de risco carregados`, 'success');
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados demo do heatmap:', error);
+      this.showNotification('Erro ao carregar dados demo do heatmap', 'error');
     }
   }
 
@@ -755,32 +879,229 @@ class SompoApp {
     this.addRiskLegendControl();
   }
 
-  addHeatmapToggleControl() {
+  addHeatmapControls() {
     if (!this.maps.full) {
       return;
     }
-    const control = L.control({ position: 'topright' });
-    control.onAdd = () => {
-      const div = L.DomUtil.create('div', 'leaflet-bar');
-      const a = L.DomUtil.create('a', '', div);
-      a.href = '#';
-      a.title = 'Alternar mapa de risco (SP)';
-      a.innerHTML = 'R';
-      L.DomEvent.on(a, 'click', e => {
+
+    // Controle principal de toggle do heatmap - posicionado no topo direito
+    const toggleControl = L.control({ position: 'topright' });
+    toggleControl.onAdd = () => {
+      const div = L.DomUtil.create('div', 'leaflet-bar heatmap-controls');
+      div.style.cssText = `
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        border: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        margin-bottom: 10px;
+      `;
+
+      // Botão principal de toggle
+      const toggleBtn = L.DomUtil.create('a', 'heatmap-toggle', div);
+      toggleBtn.href = '#';
+      toggleBtn.title = 'Alternar Heatmap de Risco';
+      toggleBtn.innerHTML = '🔥';
+      toggleBtn.style.cssText = `
+        display: block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        border-bottom: 2px solid #e9ecef;
+        font-size: 18px;
+        transition: all 0.2s ease;
+        background: transparent;
+        position: relative;
+      `;
+
+      // Botão de intensidade
+      const intensityBtn = L.DomUtil.create('a', 'heatmap-intensity', div);
+      intensityBtn.href = '#';
+      intensityBtn.title = 'Ajustar Intensidade do Heatmap';
+      intensityBtn.innerHTML = '⚙️';
+      intensityBtn.style.cssText = `
+        display: block;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        background: transparent;
+        position: relative;
+      `;
+
+      // Event handlers
+      L.DomEvent.on(toggleBtn, 'click', e => {
         L.DomEvent.stop(e);
-        const heat = this.mapLayers && this.mapLayers.riskHeat;
-        if (!heat) {
-          return;
-        }
-        if (this.maps.full.hasLayer(heat)) {
-          this.maps.full.removeLayer(heat);
-        } else {
-          heat.addTo(this.maps.full);
-        }
+        this.toggleHeatmap();
       });
+
+      L.DomEvent.on(intensityBtn, 'click', e => {
+        L.DomEvent.stop(e);
+        this.showHeatmapIntensityControl();
+      });
+
+      // Prevenir propagação de eventos do mapa
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
       return div;
     };
-    control.addTo(this.maps.full);
+    toggleControl.addTo(this.maps.full);
+
+    // Guardar referência para controle futuro
+    this.mapLayers = this.mapLayers || {};
+    this.mapLayers.heatmapControls = toggleControl;
+  }
+
+  /**
+   * Alterna a visibilidade do heatmap
+   */
+  toggleHeatmap() {
+    const heat = this.mapLayers && this.mapLayers.riskHeat;
+    if (!heat) {
+      this.showNotification('Heatmap não está carregado', 'warning');
+      return;
+    }
+
+    const isVisible = this.maps.full.hasLayer(heat);
+    
+    if (isVisible) {
+      this.maps.full.removeLayer(heat);
+      this.showNotification('Heatmap ocultado', 'info');
+    } else {
+      heat.addTo(this.maps.full);
+      this.showNotification('Heatmap exibido', 'success');
+    }
+
+    // Atualizar estado do botão
+    this.updateHeatmapToggleButton(!isVisible);
+  }
+
+  /**
+   * Atualiza o estado visual do botão de toggle
+   */
+  updateHeatmapToggleButton(isVisible) {
+    const toggleBtn = document.querySelector('.heatmap-toggle');
+    if (toggleBtn) {
+      toggleBtn.style.opacity = isVisible ? '1' : '0.5';
+      toggleBtn.style.backgroundColor = isVisible ? '#e8f5e8' : 'transparent';
+    }
+  }
+
+  /**
+   * Mostra controle de intensidade do heatmap
+   */
+  showHeatmapIntensityControl() {
+    const heat = this.mapLayers && this.mapLayers.riskHeat;
+    if (!heat) {
+      this.showNotification('Heatmap não está carregado', 'warning');
+      return;
+    }
+
+    // Criar modal de controle de intensidade
+    const modal = document.createElement('div');
+    modal.className = 'heatmap-intensity-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 10000;
+      min-width: 300px;
+    `;
+
+    modal.innerHTML = `
+      <h3 style="margin: 0 0 15px 0; color: #333;">Ajustar Heatmap</h3>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Raio:</label>
+        <input type="range" id="heatmap-radius" min="10" max="50" value="25" 
+               style="width: 100%; margin-bottom: 10px;">
+        <span id="radius-value">25</span>px
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Blur:</label>
+        <input type="range" id="heatmap-blur" min="5" max="30" value="15" 
+               style="width: 100%; margin-bottom: 10px;">
+        <span id="blur-value">15</span>px
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Opacidade:</label>
+        <input type="range" id="heatmap-opacity" min="0.1" max="1" step="0.1" value="0.4" 
+               style="width: 100%; margin-bottom: 10px;">
+        <span id="opacity-value">0.4</span>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="apply-heatmap-settings" style="
+          background: #007cba; color: white; border: none; padding: 8px 16px; 
+          border-radius: 4px; cursor: pointer;">Aplicar</button>
+        <button id="close-heatmap-modal" style="
+          background: #666; color: white; border: none; padding: 8px 16px; 
+          border-radius: 4px; cursor: pointer;">Fechar</button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Event listeners
+    const radiusSlider = modal.querySelector('#heatmap-radius');
+    const blurSlider = modal.querySelector('#heatmap-blur');
+    const opacitySlider = modal.querySelector('#heatmap-opacity');
+    const applyBtn = modal.querySelector('#apply-heatmap-settings');
+    const closeBtn = modal.querySelector('#close-heatmap-modal');
+
+    // Atualizar valores em tempo real
+    radiusSlider.addEventListener('input', (e) => {
+      modal.querySelector('#radius-value').textContent = e.target.value;
+    });
+
+    blurSlider.addEventListener('input', (e) => {
+      modal.querySelector('#blur-value').textContent = e.target.value;
+    });
+
+    opacitySlider.addEventListener('input', (e) => {
+      modal.querySelector('#opacity-value').textContent = e.target.value;
+    });
+
+    // Aplicar configurações
+    applyBtn.addEventListener('click', () => {
+      const newRadius = parseInt(radiusSlider.value);
+      const newBlur = parseInt(blurSlider.value);
+      const newOpacity = parseFloat(opacitySlider.value);
+
+      heat.setOptions({
+        radius: newRadius,
+        blur: newBlur,
+        minOpacity: newOpacity
+      });
+
+      this.showNotification('Configurações do heatmap aplicadas', 'success');
+      modal.remove();
+    });
+
+    // Fechar modal
+    closeBtn.addEventListener('click', () => {
+      modal.remove();
+    });
+
+    // Fechar ao clicar fora
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
   }
 
   addRiskAreasToggleControl() {
@@ -815,27 +1136,78 @@ class SompoApp {
     if (this._riskLegendAdded || !this.maps.full) {
       return;
     }
-    const legend = L.control({ position: 'bottomright' });
+    
+    // Posicionar legenda no canto inferior esquerdo para não conflitar com controles
+    const legend = L.control({ position: 'bottomleft' });
     legend.onAdd = () => {
-      const div = L.DomUtil.create('div', 'glass-card');
-      div.style.padding = '8px 10px';
-      div.style.fontSize = '12px';
-      const spanStyle = 'display:inline-block;width:12px;height:12px;border-radius:2px';
+      const div = L.DomUtil.create('div', 'glass-card map-legend');
+      div.style.cssText = `
+        padding: 12px 14px;
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 200px;
+        margin-right: 10px;
+      `;
+      
+      const spanStyle = 'display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px';
+      
       div.innerHTML = `
-                <div style="font-weight:600;margin-bottom:6px">Zonas de risco</div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <span style="${spanStyle};background:#ef4444;opacity:.7"></span> 
-                  Alto
-                </div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <span style="${spanStyle};background:#f59e0b;opacity:.7"></span> 
-                  Médio
-                </div>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <span style="${spanStyle};background:#10b981;opacity:.7"></span> 
-                  Baixo
-                </div>
-            `;
+        <div style="font-weight:700;margin-bottom:8px;color:#333;font-size:12px">
+          🗺️ Legenda do Mapa
+        </div>
+        
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #eee;">
+          <div style="font-weight:600;margin-bottom:4px;color:#666;font-size:11px;">Heatmap de Risco</div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#0066cc;opacity:.8"></span> 
+            <span style="font-size:10px;">Baixo Risco</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#00cccc;opacity:.8"></span> 
+            <span style="font-size:10px;">Moderado</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#66ff66;opacity:.8"></span> 
+            <span style="font-size:10px;">Médio</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#ffff00;opacity:.8"></span> 
+            <span style="font-size:10px;">Alto</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#ff9900;opacity:.8"></span> 
+            <span style="font-size:10px;">Muito Alto</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <span style="${spanStyle};background:#ff3300;opacity:.8"></span> 
+            <span style="font-size:10px;">Crítico</span>
+          </div>
+        </div>
+        
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #eee;">
+          <div style="font-weight:600;margin-bottom:4px;color:#666;font-size:11px;">Zonas de Risco</div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#ef4444;opacity:.7"></span> 
+            <span style="font-size:10px;">Alto</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;margin-bottom:2px">
+            <span style="${spanStyle};background:#f59e0b;opacity:.7"></span> 
+            <span style="font-size:10px;">Médio</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center">
+            <span style="${spanStyle};background:#10b981;opacity:.7"></span> 
+            <span style="font-size:10px;">Baixo</span>
+          </div>
+        </div>
+        
+        <div style="font-size:9px;color:#888;text-align:center;margin-top:4px;">
+          💡 Use 🔥⚙️ para ajustar
+        </div>
+      `;
       return div;
     };
     legend.addTo(this.maps.full);
@@ -1564,19 +1936,50 @@ class SompoApp {
     }
 
     try {
-      // Buscar cargas do backend (simuladas + reais)
-      const response = await fetch(`${window.API_BASE_URL}/shipments?limit=50`);
-      const data = await response.json();
+      // Primeiro verificar se há simulação ativa
+      const simResponse = await fetch(`${window.API_BASE_URL}/simulator/status`);
+      const simData = await simResponse.json();
+      
+      let items = [];
+      
+      if (simData.success && simData.data.is_running && simData.data.shipments) {
+        // Se há simulação ativa, usar dados da simulação
+        items = simData.data.shipments.map(shipment => ({
+          id: shipment.id || shipment.shipment_id,
+          shipmentNumber: shipment.shipment_number || shipment.shipmentNumber || `SIM-${shipment.id}`,
+          origin: shipment.origin || 'Origem não definida',
+          destination: shipment.destination || 'Destino não definido',
+          status: shipment.status || 'in_transit',
+          cargoType: shipment.cargo_type || shipment.cargoType || 'Carga geral',
+          cargoValue: shipment.cargo_value || shipment.cargoValue || 50000,
+          progress: shipment.progress_percent || shipment.progress || 0,
+          riskScore: shipment.current_risk_score || shipment.risk_score || 45,
+          is_simulated: true,
+          currentPosition: shipment.current_position || shipment.currentPosition
+        }));
+      } else {
+        // Se não há simulação ativa, buscar cargas reais (não simuladas)
+        const response = await fetch(`${window.API_BASE_URL}/shipments?limit=50&exclude_simulated=true`);
+        const data = await response.json();
 
-      if (!data.success) {
-        list.innerHTML = '<div class="empty-state">Erro ao carregar cargas</div>';
-        return;
+        if (data.success) {
+          items = data.data.shipments || [];
+        }
       }
 
-      const items = data.data.shipments || [];
-
       if (items.length === 0) {
-        list.innerHTML = '<div class="empty-state">Nenhuma carga ativa. Inicie o simulador.</div>';
+        list.innerHTML = `
+          <div class="empty-state">
+            <div style="text-align: center; padding: 2rem;">
+              <i class="fas fa-truck" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+              <h3>Nenhuma carga ativa</h3>
+              <p>Inicie o simulador para gerar cargas de teste ou cadastre cargas reais.</p>
+              <button class="btn btn-primary" onclick="window.sompoApp.navigateToSection('simulator')" style="margin-top: 1rem;">
+                <i class="fas fa-play"></i> Iniciar Simulador
+              </button>
+            </div>
+          </div>
+        `;
         return;
       }
 
@@ -1646,7 +2049,18 @@ class SompoApp {
       });
     } catch (error) {
       console.error('Error loading shipments:', error);
-      list.innerHTML = '<div class="empty-state">Erro ao carregar cargas</div>';
+      list.innerHTML = `
+        <div class="empty-state">
+          <div style="text-align: center; padding: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f59e0b; margin-bottom: 1rem;"></i>
+            <h3>Erro ao carregar cargas</h3>
+            <p>Verifique a conexão com o servidor e tente novamente.</p>
+            <button class="btn btn-secondary" onclick="window.sompoApp.loadShipmentsData()" style="margin-top: 1rem;">
+              <i class="fas fa-sync-alt"></i> Tentar Novamente
+            </button>
+          </div>
+        </div>
+      `;
     }
   }
 
@@ -2569,6 +2983,19 @@ class SompoApp {
       `<i class="fas fa-clock"></i> ${elapsed}ms`;
     document.getElementById('segment-key').innerHTML = 
       `<i class="fas fa-map-marker-alt"></i> ${data.segment_key || 'N/A'}`;
+
+    // Mostrar fonte da condição climática
+    const weatherStatus = document.getElementById('weather-status');
+    if (data.weather_source === 'real_time_api') {
+      weatherStatus.innerHTML = `✅ Clima atual detectado: ${data.weather_used}`;
+      weatherStatus.style.color = 'var(--success-color)';
+    } else if (data.weather_source === 'fallback') {
+      weatherStatus.innerHTML = `⚠️ Clima padrão (API indisponível)`;
+      weatherStatus.style.color = 'var(--warning-color)';
+    } else {
+      weatherStatus.innerHTML = `📝 Condição climática selecionada`;
+      weatherStatus.style.color = 'var(--text-secondary)';
+    }
 
     // Update recommendations
     const recsEl = document.getElementById('risk-recommendations');

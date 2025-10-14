@@ -446,12 +446,13 @@
                   <div class="form-group">
                     <label for="risk-weather">Condição Climática (opcional)</label>
                     <select id="risk-weather">
-                      <option value="">Padrão</option>
+                      <option value="">🌡️ Automático (Clima Atual)</option>
                       <option value="claro">☀️ Céu Claro</option>
                       <option value="nublado">☁️ Nublado</option>
                       <option value="chuva">🌧️ Chuva</option>
                       <option value="neblina">🌫️ Neblina</option>
                     </select>
+                    <small id="weather-status"></small>
                   </div>
 
                   <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
@@ -750,7 +751,7 @@
       crossorigin=""
     ></script>
     <!-- Leaflet.heat plugin for heatmap layer -->
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <script src="historical-data.js?v=1"></script>
     <script src="live-alerts.js?v=1"></script>
     <script src="modern-app.js?v=6"></script>

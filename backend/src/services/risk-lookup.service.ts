@@ -49,6 +49,8 @@ interface RiskPredictionResult {
   risk_level: 'baixo' | 'moderado' | 'alto' | 'critico';
   context_used: string;
   recommendations: string[];
+  weather_source?: 'user_input' | 'real_time_api' | 'fallback';
+  weather_used?: string;
   nearby_segments?: Array<{
     segment_key: string;
     risk_score: number;
@@ -102,7 +104,7 @@ class RiskLookupService {
   /**
    * Prediz o risco para um segmento e contexto específico
    */
-  async predict(input: RiskPredictionInput): Promise<RiskPredictionResult> {
+  async predict(input: RiskPredictionInput, weatherInfo?: { source: string; condition: string }): Promise<RiskPredictionResult> {
     if (!this.isLoaded || !this.riskData) {
       // Fallback se o arquivo não estiver carregado
       return this.getFallbackPrediction(input);
@@ -162,6 +164,8 @@ class RiskLookupService {
       risk_level,
       context_used: context,
       recommendations,
+      weather_source: weatherInfo?.source as any,
+      weather_used: weatherInfo?.condition,
       nearby_segments,
     };
   }
@@ -174,14 +178,10 @@ class RiskLookupService {
     const dayOfWeek = input.dayOfWeek ?? 2;
     const weather = (input.weatherCondition || '').toLowerCase();
 
-    // Determinar fase do dia
+    // Determinar fase do dia (simplificado para dia/noite)
     let phase: string;
     if (hour >= 18 || hour < 6) {
       phase = 'noite';
-    } else if (hour >= 6 && hour < 7) {
-      phase = 'amanhecer';
-    } else if (hour >= 17 && hour < 18) {
-      phase = 'anoitecer';
     } else {
       phase = 'dia';
     }
@@ -192,18 +192,13 @@ class RiskLookupService {
       clima = 'chuvoso';
     } else if (weather.includes('nublado')) {
       clima = 'nublado';
+    } else if (weather.includes('neblina') || weather.includes('nevoeiro')) {
+      clima = 'chuvoso'; // Mapear neblina para chuvoso
     } else {
       clima = 'claro';
     }
 
-    // Fim de semana?
-    const isFds = dayOfWeek === 5 || dayOfWeek === 6;
-
-    // Construir nome do contexto
-    if (isFds && phase === 'noite') {
-      return 'fds_noite_claro'; // Final de semana à noite
-    }
-
+    // Remover caso especial de FDS - usar contextos normais
     return `${phase}_${clima}`;
   }
 

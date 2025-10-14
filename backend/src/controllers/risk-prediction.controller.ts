@@ -12,6 +12,7 @@
 import { Request, Response, NextFunction } from 'express';
 import riskLookupService from '../services/risk-lookup.service';
 import mlApiClient from '../services/ml-api-client.service';
+import weatherApiService from '../services/weather-api.service';
 
 export const riskPredictionController = {
   /**
@@ -52,6 +53,24 @@ export const riskPredictionController = {
         return;
       }
 
+      // Se weatherCondition não especificado ou vazio, buscar clima atual
+      let finalWeatherCondition = weatherCondition;
+      let weatherSource = 'user_input';
+      let weatherUsed = weatherCondition;
+      
+      if (!weatherCondition || weatherCondition === '' || weatherCondition === 'padrão') {
+        const currentWeather = await weatherApiService.getWeatherByLocation(uf, br, km);
+        if (currentWeather) {
+          finalWeatherCondition = currentWeather.condition;
+          weatherSource = currentWeather.source === 'api' ? 'real_time_api' : 'fallback';
+          weatherUsed = currentWeather.condition;
+        } else {
+          finalWeatherCondition = 'claro'; // fallback
+          weatherSource = 'fallback';
+          weatherUsed = 'claro';
+        }
+      }
+
       let prediction;
       let source = 'precalculated'; // 'precalculated' ou 'ml_realtime'
 
@@ -64,7 +83,7 @@ export const riskPredictionController = {
           hour,
           dayOfWeek,
           month,
-          weatherCondition,
+          weatherCondition: finalWeatherCondition,
           dayPhase,
           roadType,
         });
@@ -83,7 +102,10 @@ export const riskPredictionController = {
           km,
           hour,
           dayOfWeek,
-          weatherCondition,
+          weatherCondition: finalWeatherCondition,
+        }, {
+          source: weatherSource,
+          condition: weatherUsed
         });
       }
 
