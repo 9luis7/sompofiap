@@ -1,0 +1,8 @@
+username,email,full_name,role,is_active,department,phone,permissions,last_login
+admin.sompo,admin@sompo.com.br,Administrador Sompo,admin,true,Tecnologia,+55 11 99999-0001,"read,write,delete,admin",2024-01-15 14:30:00
+joao.silva,joao.silva@sompo.com.br,João Silva,operator,true,Centro de Controle,+55 11 99999-0002,"read,write",2024-01-15 14:25:00
+maria.santos,maria.santos@sompo.com.br,Maria Santos,operator,true,Centro de Controle,+55 11 99999-0003,"read,write",2024-01-15 14:20:00
+carlos.oliveira,carlos.oliveira@sompo.com.br,Carlos Oliveira,operator,true,Centro de Controle,+55 11 99999-0004,"read,write",2024-01-15 14:15:00
+ana.pereira,ana.pereira@sompo.com.br,Ana Pereira,operator,true,Centro de Controle,+55 21 99999-0005,"read,write",2024-01-15 14:10:00
+cliente.techcom,cliente@techcom.com.br,Cliente TechCom,client,true,Cliente,+55 11 88888-0001,read,2024-01-15 14:05:00
+cliente.farma,cliente@farma.com.br,Cliente FarmaBrasil,client,true,Cliente,+55 31 88888-0002,read,2024-01-15 14:00:00

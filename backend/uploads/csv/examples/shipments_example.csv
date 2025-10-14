@@ -1,0 +1,6 @@
+shipment_number,vehicle_id,status,origin_address,destination_address,cargo_type,cargo_value,planned_departure,planned_arrival,customer_name,customer_contact,special_requirements
+SHP-2024-001,1,in_transit,São Paulo SP,Rio de Janeiro RJ,Eletrônicos Premium,125000.00,2024-01-15 08:00:00,2024-01-15 18:00:00,TechCom Distribuidora Ltda,+55 11 99876-5432,Temperatura controlada
+SHP-2024-002,2,planned,Belo Horizonte MG,Salvador BA,Medicamentos Controlados,89000.00,2024-01-16 09:00:00,2024-01-16 20:00:00,FarmaBrasil S.A.,+55 31 98765-4321,Refrigerado segurança máxima
+SHP-2024-003,3,completed,Porto Alegre RS,São Paulo SP,Alimentos Não Perecíveis,45000.00,2024-01-14 07:00:00,2024-01-14 17:00:00,SuperMercados União Ltda,+55 51 97654-3210,Carga seca sem refrigeração
+SHP-2024-004,4,in_transit,Recife PE,Fortaleza CE,Roupas e Acessórios,78000.00,2024-01-15 10:00:00,2024-01-15 22:00:00,Moda Nordeste Distribuidora,+55 81 96543-2109,Carga frágil cuidados especiais
+SHP-2024-005,1,emergency,Goiânia GO,Brasília DF,Equipamentos Industriais,320000.00,2024-01-15 06:00:00,2024-01-15 16:00:00,Indústria Tech Brasil S.A.,+55 62 95432-1098,Carga especial escolta obrigatória

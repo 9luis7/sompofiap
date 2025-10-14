@@ -1,0 +1,6 @@
+license_plate,vehicle_type,capacity_kg,owner_company,iot_device_id,is_active,status,driver_name,current_location_lat,current_location_lng,last_update
+ABC-1234,Bitrem,45000,Transportadora São Paulo Ltda,IOT-SP-001,true,in_transit,João Silva,-23.5505,-46.6333,2024-01-15 14:30:00
+DEF-5678,Cavalo Mecânico + Prancha,28000,Logística Nordeste S.A.,IOT-BA-002,true,loading,Maria Santos,-12.9714,-38.5014,2024-01-15 14:25:00
+GHI-9012,Truck 3/4,12000,Distribuidora Rio Ltda,IOT-RJ-003,true,stopped,Carlos Oliveira,-22.9068,-43.1729,2024-01-15 14:20:00
+JKL-3456,Bitrem,48000,Transportes Belo Horizonte,IOT-MG-004,true,in_transit,Ana Pereira,-19.9191,-43.9386,2024-01-15 14:35:00
+MNO-7890,Cavalo Mecânico + Prancha,32000,Logística Sul Brasil,IOT-RS-005,false,maintenance,Roberto Costa,-30.0346,-51.2177,2024-01-15 14:15:00
