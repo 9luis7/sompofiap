@@ -132,3 +132,6 @@ CONFIG.getAuthHeaders = function () {
 
 // Exportar configuração
 window.CONFIG = CONFIG;
+
+// Para compatibilidade com código que usa window.API_BASE_URL diretamente
+window.API_BASE_URL = CONFIG.API_BASE_URL + '/api/v1';

@@ -6,8 +6,8 @@ class SompoApp {
     this.isDarkMode = false;
     this.charts = {};
     this.maps = {};
-    this.demoData = { shipments: [], alerts: [], vehicles: [] };
     this.mapMarkers = {};
+    this.liveAlerts = null; // Will be initialized when HistoricalDataModule loads
     this.init();
   }
 
@@ -16,6 +16,7 @@ class SompoApp {
     this.setupThemeToggle();
     this.simulateLoading();
     this.setupNavigation();
+    this.checkMLStatus(); // Check ML API status
   }
 
   setupEventListeners() {
@@ -23,6 +24,12 @@ class SompoApp {
     const closeAllNavItems = () => {
       document.querySelectorAll('.nav-item.open').forEach(i => i.classList.remove('open'));
     };
+
+    // Simulator controls
+    this.setupSimulatorControls();
+
+    // Risk Checker (ML Prediction)
+    this.setupRiskChecker();
 
     // Login form
     const loginForm = document.getElementById('login-form');
@@ -278,10 +285,18 @@ class SompoApp {
     // Setup real-time updates
     this.setupRealTimeUpdates();
 
-    // Prepare dataset, charts and mini map
-    this.generateDemoDataset();
+    // Prepare charts and mini map
     this.initializeCharts();
     this.initMiniMap();
+
+    // Load dashboard data from API
+    this.loadDashboardData();
+
+    // Initialize live alerts module
+    if (typeof LiveAlertsModule !== 'undefined') {
+      this.liveAlerts = new LiveAlertsModule(this);
+      this.liveAlerts.initialize();
+    }
   }
 
   animateStatsCards() {
@@ -336,9 +351,7 @@ class SompoApp {
     }
     if (this.charts.alerts) {
       const regions = this.charts.alerts.data.labels || ['SP', 'RJ', 'MG'];
-      const regData = regions.map(
-        (_, i) => Math.floor(3 / regions.length) + (i < 3 % regions.length ? 1 : 0)
-      );
+      const regData = regions.map(() => 0);
       this.charts.alerts.data.datasets[0].data = regData;
       this.charts.alerts.update('none');
     }
@@ -572,30 +585,35 @@ class SompoApp {
       return;
     }
     try {
-      const resp = await fetch('data/sp_risk_points.json');
+      // Buscar dados reais de acidentes do backend
+      const resp = await fetch(`${window.API_BASE_URL}/accidents/heatmap?years=3&limit=5000`);
       const json = await resp.json();
-      const points = (json.points || []).map(p => [p.lat, p.lng, p.intensity || 0.6]);
-      // fallback amostra
-      const fallback = [
-        [-23.5614, -46.6554, 0.6], // Av. Paulista
-        [-23.5716, -46.6916, 0.7], // Faria Lima
-        [-23.516, -46.624, 0.5], // Marginal Tietê
-      ];
-      const heat = L.heatLayer(points.length ? points : fallback, {
-        radius: 18,
-        blur: 20,
-        maxZoom: 17,
-        minOpacity: 0.35,
-      });
-      heat.addTo(this.maps.full);
-      // Guardar referência para controle futuro
-      this.mapLayers = this.mapLayers || {};
-      this.mapLayers.riskHeat = heat;
-      // Adicionar controle simples de toggle
-      this.addHeatmapToggleControl();
-      this.addRiskLegendControl();
-    } catch (_) {
-      // ignore
+
+      if (json.success && json.data && json.data.points && json.data.points.length > 0) {
+        const points = json.data.points.map(p => [p.lat, p.lng, p.intensity || 0.5]);
+
+        const heat = L.heatLayer(points, {
+          radius: 18,
+          blur: 20,
+          maxZoom: 17,
+          minOpacity: 0.35,
+        });
+        heat.addTo(this.maps.full);
+
+        // Guardar referência para controle futuro
+        this.mapLayers = this.mapLayers || {};
+        this.mapLayers.riskHeat = heat;
+
+        // Adicionar controles
+        this.addHeatmapToggleControl();
+        this.addRiskLegendControl();
+
+        console.log(`Heatmap carregado com ${points.length} pontos de acidentes reais`);
+      } else {
+        console.warn('Nenhum ponto de risco disponível no backend');
+      }
+    } catch (error) {
+      console.error('Erro ao carregar heatmap de acidentes:', error);
     }
   }
 
@@ -604,29 +622,97 @@ class SompoApp {
       return;
     }
     try {
-      const resp = await fetch('data/sp_risk_areas.geojson');
-      const geojson = await resp.json();
-      const style = feature => {
-        const level = (feature.properties && feature.properties.level) || 'medium';
-        const color = level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#10b981';
-        return { color, weight: 2, fillColor: color, fillOpacity: 0.18 };
-      };
-      const layer = L.geoJSON(geojson, {
-        style,
-        onEachFeature: (f, l) => {
-          const name =
-            (f.properties && (f.properties.name || f.properties.level)) || 'Zona de risco';
-          l.bindPopup(`<b>${name}</b>`);
-        },
-      });
-      layer.addTo(this.maps.full);
-      this.mapLayers = this.mapLayers || {};
-      this.mapLayers.riskAreas = layer;
-      this.addRiskAreasToggleControl();
-      this.addRiskLegendControl();
-    } catch (_) {
-      // ignore
+      // Tentar carregar zonas de risco do backend
+      const resp = await fetch(`${window.API_BASE_URL}/risk/zones?limit=100`);
+      const json = await resp.json();
+
+      if (json.success && json.data && json.data.zones && json.data.zones.length > 0) {
+        // Criar features GeoJSON a partir dos dados do backend
+        const features = json.data.zones
+          .filter(z => z.boundary && z.boundary.coordinates)
+          .map(z => ({
+            type: 'Feature',
+            properties: {
+              name: z.zone_name,
+              level: z.zone_type,
+              riskScore: z.risk_score,
+              incidentCount: z.incident_count,
+            },
+            geometry: z.boundary,
+          }));
+
+        if (features.length > 0) {
+          const geojson = { type: 'FeatureCollection', features };
+
+          const style = feature => {
+            const level = (feature.properties && feature.properties.level) || 'green';
+            const color = level === 'red' ? '#ef4444' : level === 'yellow' ? '#f59e0b' : '#10b981';
+            return { color, weight: 2, fillColor: color, fillOpacity: 0.18 };
+          };
+
+          const layer = L.geoJSON(geojson, {
+            style,
+            onEachFeature: (f, l) => {
+              const props = f.properties;
+              const name = props.name || 'Zona de risco';
+              const popup = `
+                <b>${name}</b><br/>
+                Risco: ${props.riskScore || 'N/A'}<br/>
+                Incidentes: ${props.incidentCount || 0}
+              `;
+              l.bindPopup(popup);
+            },
+          });
+
+          layer.addTo(this.maps.full);
+          this.mapLayers = this.mapLayers || {};
+          this.mapLayers.riskAreas = layer;
+          this.addRiskAreasToggleControl();
+          this.addRiskLegendControl();
+
+          console.log(`Zonas de risco carregadas: ${features.length} zonas`);
+        }
+      } else {
+        // Fallback para arquivo estático se backend não tiver dados
+        const resp2 = await fetch('data/sp_risk_areas.geojson');
+        if (resp2.ok) {
+          const geojson = await resp2.json();
+          this.renderStaticRiskAreas(geojson);
+        }
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar zonas de risco:', error);
+      // Tentar fallback para arquivo estático
+      try {
+        const resp = await fetch('data/sp_risk_areas.geojson');
+        if (resp.ok) {
+          const geojson = await resp.json();
+          this.renderStaticRiskAreas(geojson);
+        }
+      } catch (_) {
+        // ignore
+      }
     }
+  }
+
+  renderStaticRiskAreas(geojson) {
+    const style = feature => {
+      const level = (feature.properties && feature.properties.level) || 'medium';
+      const color = level === 'high' ? '#ef4444' : level === 'medium' ? '#f59e0b' : '#10b981';
+      return { color, weight: 2, fillColor: color, fillOpacity: 0.18 };
+    };
+    const layer = L.geoJSON(geojson, {
+      style,
+      onEachFeature: (f, l) => {
+        const name = (f.properties && (f.properties.name || f.properties.level)) || 'Zona de risco';
+        l.bindPopup(`<b>${name}</b>`);
+      },
+    });
+    layer.addTo(this.maps.full);
+    this.mapLayers = this.mapLayers || {};
+    this.mapLayers.riskAreas = layer;
+    this.addRiskAreasToggleControl();
+    this.addRiskLegendControl();
   }
 
   addHeatmapToggleControl() {
@@ -728,149 +814,9 @@ class SompoApp {
     return map;
   }
 
-  addDemoMarkers(map, fitBounds) {
-    const mapId = map._container && map._container.id ? map._container.id : 'unknown';
-    const markers = this.demoData.shipments.map(s => {
-      const color =
-        s.status === 'stopped' ? '#ef4444' : s.status === 'loading' ? '#f59e0b' : '#3b82f6';
-      const m = L.circleMarker([s.lat, s.lng], {
-        radius: 3,
-        color,
-        fillColor: color,
-        fillOpacity: 0.85,
-      }).addTo(map);
-      m.meta = { status: s.status, region: s.region, address: s.address, city: s.cityUF };
-      m.bindPopup(`<b>${s.shipmentNumber}</b><br/>${s.address}<br/><small>${s.status}</small>`);
-      return m;
-    });
-    this.mapMarkers[mapId] = markers;
-    if (fitBounds && markers.length) {
-      const group = new L.featureGroup(markers);
-      map.fitBounds(group.getBounds().pad(0.2));
-    }
-  }
-
-  // Demo dataset with detailed addresses
-  generateDemoDataset() {
-    const cities = [
-      {
-        cityUF: 'São Paulo, SP',
-        region: 'SP',
-        base: [-23.5505, -46.6333],
-        anchors: [
-          { name: 'Av. Paulista', lat: -23.5614, lng: -46.6554 },
-          { name: 'Av. Faria Lima', lat: -23.5716, lng: -46.6916 },
-          { name: 'Rua Oscar Freire', lat: -23.561, lng: -46.667 },
-          { name: 'Av. Rebouças', lat: -23.567, lng: -46.678 },
-          { name: 'Marginal Tietê', lat: -23.516, lng: -46.624 },
-        ],
-      },
-      {
-        cityUF: 'Rio de Janeiro, RJ',
-        region: 'RJ',
-        base: [-22.9068, -43.1729],
-        anchors: [
-          { name: 'Rua Barata Ribeiro', lat: -22.9694, lng: -43.1869 },
-          { name: 'Av. Brasil', lat: -22.8746, lng: -43.2465 },
-          { name: 'Rua Visconde de Pirajá', lat: -22.984, lng: -43.205 },
-          { name: 'Av. das Américas', lat: -23.0006, lng: -43.365 },
-          { name: 'Centro (Av. Rio Branco)', lat: -22.9035, lng: -43.1769 },
-        ],
-      },
-      {
-        cityUF: 'Belo Horizonte, MG',
-        region: 'MG',
-        base: [-19.9167, -43.9345],
-        anchors: [
-          { name: 'Av. Afonso Pena', lat: -19.9256, lng: -43.9378 },
-          { name: 'Av. Amazonas', lat: -19.919, lng: -43.956 },
-          { name: 'Rua da Bahia', lat: -19.9251, lng: -43.9362 },
-          { name: 'Av. Cristiano Machado', lat: -19.8678, lng: -43.9276 },
-          { name: 'Av. do Contorno', lat: -19.934, lng: -43.933 },
-        ],
-      },
-    ];
-
-    const shipments = [];
-    const alerts = [];
-    const vehicles = [];
-    let shipmentId = 1;
-    // Generate a realistic fleet with regional distribution
-    // SP: maior centro logístico (mais cargas/veículos)
-    // RJ/MG: centros menores (menos cargas/veículos)
-    const fleetDistribution = {
-      SP: { vehicles: 35, shipments: 80 }, // São Paulo: 35 veículos, 80 cargas
-      RJ: { vehicles: 25, shipments: 45 }, // Rio: 25 veículos, 45 cargas
-      MG: { vehicles: 20, shipments: 35 }, // BH: 20 veículos, 35 cargas
-    };
-    // Total: 80 veículos, 160 cargas (mais realista)
-
-    cities.forEach((c, _cIdx) => {
-      const fleet = fleetDistribution[c.region];
-
-      // Jitter por região (RJ menor para evitar mar)
-      const jitter = c.region === 'RJ' ? { lat: 0.0012, lng: 0.0012 } : { lat: 0.002, lng: 0.0024 };
-
-      // Vehicles for this city (ancorados em vias reais)
-      for (let v = 0; v < fleet.vehicles; v++) {
-        const plate = `SOM-${c.region}-${String(v + 1).padStart(3, '0')}`;
-        const anchor = c.anchors[Math.floor(Math.random() * c.anchors.length)];
-        const lat = anchor.lat + (Math.random() - 0.5) * 2 * jitter.lat;
-        const lng = anchor.lng + (Math.random() - 0.5) * 2 * jitter.lng;
-        vehicles.push({ plate, cityUF: c.cityUF, region: c.region, lat, lng });
-      }
-
-      for (let i = 0; i < fleet.shipments; i++) {
-        const status = i % 10 === 0 ? 'stopped' : i % 6 === 0 ? 'loading' : 'in_transit';
-        const anchor = c.anchors[Math.floor(Math.random() * c.anchors.length)];
-        const num = 100 + (i % 300);
-        const lat = anchor.lat + (Math.random() - 0.5) * 2 * jitter.lat;
-        const lng = anchor.lng + (Math.random() - 0.5) * 2 * jitter.lng;
-
-        // Define origem e destino simulados (também em terra firme)
-        const originAnchor = c.anchors[Math.floor(Math.random() * c.anchors.length)];
-        const destCity = cities[(Math.floor(Math.random() * cities.length) + 1) % cities.length];
-        const destAnchor = destCity.anchors[Math.floor(Math.random() * destCity.anchors.length)];
-        const originLat = originAnchor.lat + (Math.random() - 0.5) * jitter.lat;
-        const originLng = originAnchor.lng + (Math.random() - 0.5) * jitter.lng;
-        const destLat =
-          destAnchor.lat + (Math.random() - 0.5) * (destCity.region === 'RJ' ? 0.0012 : 0.002);
-        const destLng =
-          destAnchor.lng + (Math.random() - 0.5) * (destCity.region === 'RJ' ? 0.0012 : 0.0024);
-        const route = this.generateRoute(originLat, originLng, destLat, destLng, 14);
-        shipments.push({
-          id: shipmentId,
-          shipmentNumber: `${c.region}-${String(shipmentId).padStart(5, '0')}`,
-          cityUF: c.cityUF,
-          region: c.region,
-          status,
-          address: `${anchor.name}, ${num} - ${c.cityUF}`,
-          lat,
-          lng,
-          originLat,
-          originLng,
-          destLat,
-          destLng,
-          route,
-        });
-        // Alertas coerentes: parte das cargas gera alerta
-        if (Math.random() < 0.12) {
-          const types = ['Roubo', 'Acidente', 'Desvio de rota'];
-          alerts.push({
-            id: shipmentId * 100 + i,
-            region: c.region,
-            type: types[i % types.length],
-            address: `${anchor.name}, ${num} - ${c.cityUF}`,
-            lat,
-            lng,
-          });
-        }
-        shipmentId++;
-      }
-    });
-    this.demoData.shipments = shipments;
-    this.demoData.alerts = alerts;
-    this.demoData.vehicles = vehicles;
+  addDemoMarkers(_map, _fitBounds) {
+    // Dados devem vir do backend via API real
+    return [];
   }
 
   generateRoute(lat1, lng1, lat2, lng2, points = 12) {
@@ -884,10 +830,11 @@ class SompoApp {
     return route;
   }
 
-  drawFullMapLayers() {
+  async drawFullMapLayers() {
     if (!this.maps.full || typeof L === 'undefined') {
       return;
     }
+
     // Clear previous group
     if (!this.mapLayers) {
       this.mapLayers = {};
@@ -899,50 +846,80 @@ class SompoApp {
     }
 
     const group = this.mapLayers.fullGroup;
-    const colorForStatus = s =>
-      s === 'in_transit' ? '#3b82f6' : s === 'loading' ? '#f59e0b' : '#94a3b8';
 
-    // Draw ONLY shipment markers (routes serão exibidas ao clicar)
-    const markers = [];
-    this.demoData.shipments.forEach(s => {
-      const marker = L.circleMarker([s.lat, s.lng], {
-        radius: 4,
-        color: colorForStatus(s.status),
-        fillColor: colorForStatus(s.status),
-        fillOpacity: 0.9,
-      }).addTo(group);
-      marker.bindPopup(
-        `<b>${s.shipmentNumber}</b><br/>${s.address}<br/><small>${s.status}</small>`
-      );
-      marker.shipment = s;
-      marker.on('click', e => {
-        L.DomEvent.stopPropagation(e);
-        this.showShipmentRoute(s, marker);
-      });
-      markers.push(marker);
-    });
-    this.mapMarkers['map-full'] = markers;
-
-    // Draw alerts
-    this.demoData.alerts.forEach(a => {
-      L.circleMarker([a.lat, a.lng], {
-        radius: 5,
-        color: '#ef4444',
-        fillColor: '#ef4444',
-        fillOpacity: 0.9,
-      })
-        .bindPopup(`<b>${a.type}</b><br/>${a.address}`)
-        .addTo(group);
-    });
-
-    // Fit bounds to markers
     try {
-      const bounds = group.getBounds();
-      if (bounds && bounds.isValid()) {
-        this.maps.full.fitBounds(bounds.pad(0.2));
+      // Load simulated shipments
+      const response = await fetch(`${window.API_BASE_URL}/shipments?limit=100`);
+      const data = await response.json();
+
+      if (data.success && data.data.shipments) {
+        const shipments = data.data.shipments;
+        const markers = [];
+
+        shipments.forEach(shipment => {
+          if (
+            shipment.currentPosition &&
+            shipment.currentPosition.lat &&
+            shipment.currentPosition.lng
+          ) {
+            const colorForRisk = score => {
+              if (score >= 80) {
+                return '#dc2626';
+              } // Critical
+              if (score >= 60) {
+                return '#ea580c';
+              } // High
+              if (score >= 40) {
+                return '#f59e0b';
+              } // Medium
+              return '#3b82f6'; // Low
+            };
+
+            const marker = L.circleMarker(
+              [shipment.currentPosition.lat, shipment.currentPosition.lng],
+              {
+                radius: 6,
+                color: colorForRisk(shipment.riskScore),
+                fillColor: colorForRisk(shipment.riskScore),
+                fillOpacity: 0.9,
+                weight: 2,
+              }
+            ).addTo(group);
+
+            marker.bindPopup(`
+              <div class="shipment-popup">
+                <h3>${shipment.shipmentNumber}</h3>
+                ${shipment.is_simulated ? '<span class="badge-simulated">SIMULADO</span>' : ''}
+                <div class="popup-content">
+                  <div><strong>Status:</strong> ${shipment.status}</div>
+                  <div><strong>Origem:</strong> ${shipment.origin}</div>
+                  <div><strong>Destino:</strong> ${shipment.destination}</div>
+                  <div><strong>Progresso:</strong> ${shipment.progress.toFixed(1)}%</div>
+                  <div><strong>Risco:</strong> <span class="risk-badge risk-${this.getRiskLevel(shipment.riskScore)}">${shipment.riskScore.toFixed(0)}</span></div>
+                </div>
+              </div>
+            `);
+
+            marker.shipmentData = shipment;
+            markers.push(marker);
+          }
+        });
+
+        this.mapMarkers['map-full'] = markers;
+
+        // Fit bounds to markers if there are any
+        if (markers.length > 0) {
+          const group = new L.featureGroup(markers);
+          const bounds = group.getBounds();
+          if (bounds && bounds.isValid()) {
+            this.maps.full.fitBounds(bounds.pad(0.2));
+          }
+        }
+
+        console.log(`Loaded ${markers.length} shipments on map`);
       }
-    } catch (_) {
-      // ignore
+    } catch (error) {
+      console.error('Error loading shipments on map:', error);
     }
   }
 
@@ -1211,8 +1188,8 @@ class SompoApp {
     if (!panel || !this.maps.full) {
       return;
     }
-    const bounds = this.maps.full.getBounds();
-    const items = this.demoData.shipments.filter(s => bounds.contains(L.latLng(s.lat, s.lng)));
+    // Buscar cargas reais do backend
+    const items = [];
     const top = items.slice(0, 12);
     const selectedId =
       this._selectedMarker && this._selectedMarker.shipment
@@ -1243,35 +1220,23 @@ class SompoApp {
         `
       )
       .join('');
-    // Actions
+    // Actions - buscar dados do backend quando implementado
     panel.querySelectorAll('[data-focus]').forEach(btn => {
       btn.addEventListener('click', e => {
         e.preventDefault();
-        const id = parseInt(btn.getAttribute('data-focus'));
-        const s = this.demoData.shipments.find(x => x.id === id);
-        if (!s) {
-          return;
-        }
-        this.maps.full.setView([s.lat, s.lng], Math.max(12, this.maps.full.getZoom()));
+        this.showNotification(
+          'Funcionalidade não implementada - aguardando dados do backend',
+          'info'
+        );
       });
     });
     panel.querySelectorAll('[data-route]').forEach(btn => {
       btn.addEventListener('click', async e => {
         e.preventDefault();
-        const id = parseInt(btn.getAttribute('data-route'));
-        const s = this.demoData.shipments.find(x => x.id === id);
-        if (!s) {
-          this.showNotification('Carga não encontrada', 'warning');
-          return;
-        }
-        const marker = (this.mapMarkers['map-full'] || []).find(
-          m => m.shipment && m.shipment.id === s.id
+        this.showNotification(
+          'Funcionalidade não implementada - aguardando dados do backend',
+          'info'
         );
-        try {
-          await this.showShipmentRoute(s, marker);
-        } catch (err) {
-          this.showNotification('Falha ao traçar rota. Verifique sua conexão.', 'error');
-        }
       });
     });
   }
@@ -1370,7 +1335,8 @@ class SompoApp {
   }
 
   countAlertsByRegion(regions) {
-    return regions.map(r => this.demoData.alerts.filter(a => a.region === r).length || 0);
+    // Buscar alertas reais do backend por região
+    return regions.map(() => 0);
   }
 
   highlightRegionOnMap(region) {
@@ -1399,12 +1365,13 @@ class SompoApp {
     }
   }
 
-  renderAlertsDetails(region) {
+  renderAlertsDetails(_region) {
     const el = document.getElementById('alerts-details');
     if (!el) {
       return;
     }
-    const items = this.demoData.alerts.filter(a => a.region === region);
+    // Buscar alertas reais do backend por região
+    const items = [];
     const countsByType = items.reduce((acc, a) => {
       acc[a.type] = (acc[a.type] || 0) + 1;
       return acc;
@@ -1425,7 +1392,8 @@ class SompoApp {
       return;
     }
     const mapStatus = { in_transit: 'Em trânsito', loading: 'Carregando', stopped: 'Parado' };
-    const items = this.demoData.shipments.filter(s => s.status === statusKey).slice(0, 6);
+    // Buscar cargas reais do backend por status
+    const items = [];
     const list = items.map(s => `<div>• ${s.shipmentNumber} — ${s.address}</div>`).join('');
     el.innerHTML = `<div class="badge">${mapStatus[statusKey] || statusKey}</div>${list || '<em>Sem itens</em>'}`;
   }
@@ -1499,6 +1467,9 @@ class SompoApp {
       case 'vehicles':
         this.loadVehiclesData();
         break;
+      case 'simulator':
+        this.loadSimulatorData();
+        break;
       case 'alerts':
         this.loadAlertsData();
         break;
@@ -1508,47 +1479,262 @@ class SompoApp {
     }
   }
 
-  loadDashboardData() {
-    // Dashboard data is already loaded
-    // Dashboard data loaded
+  async loadDashboardData() {
+    // Load dashboard data from API
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/monitoring/dashboard`);
+      const data = await response.json();
+
+      if (data.success) {
+        this.updateDashboardWithData(data.data);
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
   }
 
-  loadShipmentsData() {
+  updateDashboardWithData(data) {
+    // Update stat cards
+    if (data.summary) {
+      this.updateStatCard('active-shipments', data.summary.activeShipments);
+      this.updateStatCard('total-alerts', data.summary.totalAlerts);
+      this.updateStatCard('high-risk-zones', data.summary.highRiskZones);
+      this.updateStatCard('fleet-utilization', `${data.summary.fleetUtilization.toFixed(1)}%`);
+    }
+
+    // Update charts if they exist
+    if (this.charts.status && data.riskDistribution) {
+      const { critical, high, medium, low } = data.riskDistribution;
+      this.charts.status.data.datasets[0].data = [medium + low, high, critical];
+      this.charts.status.update('none');
+    }
+  }
+
+  updateStatCard(id, value) {
+    const element = document.querySelector(`[data-stat="${id}"] .stat-number`);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+
+  async loadShipmentsData() {
     const list = document.getElementById('shipments-list');
     if (!list) {
       return;
     }
-    const items = this.demoData.shipments.slice(0, 30);
-    list.innerHTML = items
-      .map(
-        s => `
-            <div class="data-item">
-                <div>
-                    <div class="title">
-                      ${s.shipmentNumber} 
-                      <span class="badge-status ${s.status}">${s.status.replace('_', ' ')}</span>
-                    </div>
-                    <div class="subtitle">${s.address}</div>
-                    <div class="meta">${s.cityUF}</div>
+
+    try {
+      // Buscar cargas do backend (simuladas + reais)
+      const response = await fetch(`${window.API_BASE_URL}/shipments?limit=50`);
+      const data = await response.json();
+
+      if (!data.success) {
+        list.innerHTML = '<div class="empty-state">Erro ao carregar cargas</div>';
+        return;
+      }
+
+      const items = data.data.shipments || [];
+
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state">Nenhuma carga ativa. Inicie o simulador.</div>';
+        return;
+      }
+
+      list.innerHTML = items
+        .map(
+          s => `
+              <div class="data-item shipment-item" data-shipment-id="${s.id}">
+                  <div class="shipment-main">
+                      <div class="title">
+                        ${s.shipmentNumber}
+                        ${s.is_simulated ? '<span class="badge-simulated">SIMULADO</span>' : ''}
+                        <span class="badge-status ${s.status}">${s.status.replace('_', ' ')}</span>
+                      </div>
+                      <div class="subtitle">${s.origin} → ${s.destination}</div>
+                      <div class="meta">
+                        <span>${s.cargoType}</span>
+                        <span>R$ ${s.cargoValue.toLocaleString('pt-BR')}</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${s.progress || 0}%"></div>
+                        <span class="progress-text">${(s.progress || 0).toFixed(1)}%</span>
+                      </div>
+                      <div class="risk-indicator">
+                        <span class="risk-label">Risco:</span>
+                        <span class="risk-badge risk-${this.getRiskLevel(s.riskScore)}">
+                          ${(s.riskScore || 0).toFixed(0)}
+                        </span>
+                      </div>
+                  </div>
+                  <div class="shipment-actions">
+                      <button class="btn-icon" data-view-details="${s.id}" title="Ver Detalhes">
+                        <i class="fas fa-info-circle"></i>
+                      </button>
+                      <button class="btn-icon" data-view-map="${s.id}" title="Ver no Mapa">
+                        <i class="fas fa-map-marked-alt"></i>
+                      </button>
+                  </div>
+              </div>
+          `
+        )
+        .join('');
+
+      // Add event listeners
+      list.querySelectorAll('[data-view-details]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-view-details');
+          await this.showShipmentDetails(id);
+        });
+      });
+
+      list.querySelectorAll('[data-view-map]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-view-map');
+          const shipment = items.find(s => s.id == id);
+          if (shipment) {
+            this.navigateToSection('map');
+            setTimeout(() => {
+              if (this.maps.full && shipment.currentPosition) {
+                this.maps.full.setView(
+                  [shipment.currentPosition.lat, shipment.currentPosition.lng],
+                  12
+                );
+              }
+            }, 300);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error loading shipments:', error);
+      list.innerHTML = '<div class="empty-state">Erro ao carregar cargas</div>';
+    }
+  }
+
+  getRiskLevel(score) {
+    if (score >= 80) {
+      return 'critical';
+    }
+    if (score >= 60) {
+      return 'high';
+    }
+    if (score >= 40) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  async showShipmentDetails(shipmentId) {
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/shipments/${shipmentId}`);
+      const data = await response.json();
+
+      if (!data.success) {
+        this.showNotification('Erro ao carregar detalhes da carga', 'error');
+        return;
+      }
+
+      const shipment = data.data.shipment;
+
+      // Create detailed view modal
+      const modal = document.createElement('div');
+      modal.className = 'shipment-modal-overlay';
+      modal.innerHTML = `
+        <div class="shipment-modal glass-card">
+          <div class="modal-header">
+            <h2>${shipment.shipmentNumber}</h2>
+            <button class="modal-close"><i class="fas fa-times"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="shipment-detail-grid">
+              <div class="detail-section">
+                <h3>Informações da Carga</h3>
+                <div class="detail-item">
+                  <span>Status:</span>
+                  <span class="badge-status ${shipment.status}">${shipment.status}</span>
                 </div>
-                <div>
-                    <button class="btn-icon" data-focus-lat="${s.lat}" data-focus-lng="${s.lng}">
-                      <i class="fas fa-location-arrow"></i>
-                    </button>
+                <div class="detail-item">
+                  <span>Tipo de Carga:</span>
+                  <span>${shipment.cargoType}</span>
                 </div>
+                <div class="detail-item">
+                  <span>Valor:</span>
+                  <span>R$ ${shipment.cargoValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div class="detail-item">
+                  <span>Progresso:</span>
+                  <span>${shipment.progress.toFixed(1)}%</span>
+                </div>
+              </div>
+              
+              <div class="detail-section">
+                <h3>Rota</h3>
+                <div class="detail-item">
+                  <span>Origem:</span>
+                  <span>${shipment.origin}</span>
+                </div>
+                <div class="detail-item">
+                  <span>Destino:</span>
+                  <span>${shipment.destination}</span>
+                </div>
+                <div class="detail-item">
+                  <span>Distância Percorrida:</span>
+                  <span>${shipment.distanceTraveled.toFixed(1)} km</span>
+                </div>
+                <div class="detail-item">
+                  <span>Distância Restante:</span>
+                  <span>${shipment.distanceRemaining.toFixed(1)} km</span>
+                </div>
+              </div>
+              
+              <div class="detail-section">
+                <h3>Risco</h3>
+                <div class="detail-item">
+                  <span>Score Geral:</span>
+                  <span class="risk-badge risk-${this.getRiskLevel(shipment.riskScore)}">
+                    ${shipment.riskScore.toFixed(0)}
+                  </span>
+                </div>
+                <div class="detail-item">
+                  <span>Previsão de Chegada:</span>
+                  <span>${new Date(shipment.estimatedArrival).toLocaleString('pt-BR')}</span>
+                </div>
+              </div>
             </div>
-        `
-      )
-      .join('');
-    list.querySelectorAll('[data-focus-lat]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const lat = parseFloat(btn.getAttribute('data-focus-lat'));
-        const lng = parseFloat(btn.getAttribute('data-focus-lng'));
-        if (this.maps.mini) {
-          this.maps.mini.setView([lat, lng], 13);
+            
+            <div id="shipment-alerts-feed" class="shipment-alerts-section"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary modal-close-btn">Fechar</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      // Load alerts for this shipment
+      if (this.liveAlerts) {
+        await this.liveAlerts.renderShipmentAlertFeed(
+          shipment.shipmentNumber,
+          'shipment-alerts-feed'
+        );
+      }
+
+      // Add close handlers
+      modal.querySelectorAll('.modal-close, .modal-close-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          modal.remove();
+        });
+      });
+
+      modal.addEventListener('click', e => {
+        if (e.target === modal) {
+          modal.remove();
         }
       });
-    });
+    } catch (error) {
+      console.error('Error showing shipment details:', error);
+      this.showNotification('Erro ao carregar detalhes', 'error');
+    }
   }
 
   loadVehiclesData() {
@@ -1556,22 +1742,8 @@ class SompoApp {
     if (!list) {
       return;
     }
+    // Buscar veículos reais do backend
     const vehicles = {};
-    // base vehicles from dataset
-    this.demoData.vehicles.forEach(v => {
-      vehicles[v.plate] = { plate: v.plate, lastCity: v.cityUF, status: 'in_transit', count: 0 };
-    });
-    // attach shipments to vehicles deterministically
-    this.demoData.shipments.forEach(s => {
-      const vIdx = s.id % Math.max(1, this.demoData.vehicles.length);
-      const plate = this.demoData.vehicles[vIdx].plate;
-      if (!vehicles[plate]) {
-        vehicles[plate] = { plate, lastCity: s.cityUF, status: s.status, count: 0 };
-      }
-      vehicles[plate].count += 1;
-      vehicles[plate].status = s.status;
-      vehicles[plate].lastCity = s.cityUF;
-    });
     const arr = Object.values(vehicles).slice(0, 60);
     list.innerHTML = arr
       .map(
@@ -1591,38 +1763,84 @@ class SompoApp {
       .join('');
   }
 
-  loadAlertsData() {
+  async loadAlertsData() {
     const list = document.getElementById('alerts-list');
     if (!list) {
       return;
     }
-    const items = this.demoData.alerts.slice(0, 30);
-    list.innerHTML = items
-      .map(
-        a => `
-            <div class="data-item">
-                <div>
-                    <div class="title"><span class="badge">${a.type}</span> ${a.address}</div>
-                    <div class="meta">Região ${a.region}</div>
-                </div>
-                <div>
-                    <button class="btn-icon" data-focus-lat="${a.lat}" data-focus-lng="${a.lng}">
-                      <i class="fas fa-location-arrow"></i>
-                    </button>
-                </div>
-            </div>
-        `
-      )
-      .join('');
-    list.querySelectorAll('[data-focus-lat]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const lat = parseFloat(btn.getAttribute('data-focus-lat'));
-        const lng = parseFloat(btn.getAttribute('data-focus-lng'));
-        if (this.maps.mini) {
-          this.maps.mini.setView([lat, lng], 14);
-        }
+
+    try {
+      // Buscar alertas reais do backend
+      const response = await fetch(`${window.API_BASE_URL}/alerts/active`);
+      const data = await response.json();
+
+      if (!data.success) {
+        list.innerHTML = '<div class="empty-state">Erro ao carregar alertas</div>';
+        return;
+      }
+
+      const items = data.data.alerts || [];
+
+      if (items.length === 0) {
+        list.innerHTML = '<div class="empty-state">✅ Nenhum alerta ativo</div>';
+        return;
+      }
+
+      list.innerHTML = items
+        .map(
+          a => `
+              <div class="data-item alert-item alert-${a.severity}">
+                  <div class="alert-main-info">
+                      <div class="title">
+                        ${this.getAlertIcon(a.severity)} ${a.title}
+                      </div>
+                      <div class="subtitle">${a.shipment_number}</div>
+                      <div class="meta">
+                        BR-${a.br} (${a.uf}) - KM ${a.km.toFixed(1)}
+                      </div>
+                      <div class="risk-indicator">
+                        <span class="risk-label">Score:</span>
+                        <span class="risk-badge risk-${a.severity}">${a.risk_score.toFixed(0)}</span>
+                      </div>
+                  </div>
+                  <div class="alert-actions">
+                      <button class="btn-icon" data-alert-location="${a.location.lat},${a.location.lng}" title="Ver no Mapa">
+                        <i class="fas fa-map-marker-alt"></i>
+                      </button>
+                  </div>
+              </div>
+          `
+        )
+        .join('');
+
+      list.querySelectorAll('[data-alert-location]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const coords = btn.getAttribute('data-alert-location').split(',');
+          const lat = parseFloat(coords[0]);
+          const lng = parseFloat(coords[1]);
+
+          this.navigateToSection('map');
+          setTimeout(() => {
+            if (this.maps.full) {
+              this.maps.full.setView([lat, lng], 14);
+            }
+          }, 300);
+        });
       });
-    });
+    } catch (error) {
+      console.error('Error loading alerts:', error);
+      list.innerHTML = '<div class="empty-state">Erro ao carregar alertas</div>';
+    }
+  }
+
+  getAlertIcon(severity) {
+    const icons = {
+      critical: '🚨',
+      high: '⚠️',
+      medium: '⚡',
+      low: 'ℹ️',
+    };
+    return icons[severity] || '📌';
   }
 
   // Após montar camadas do mapa completo, atualizar painel quando mover/zoom
@@ -1714,7 +1932,518 @@ class SompoApp {
     return icons[type] || 'info-circle';
   }
 
+  // Simulator methods
+  setupSimulatorControls() {
+    // Will be set up when DOM is ready
+    setTimeout(() => {
+      const startBtn = document.getElementById('btn-start-sim');
+      const pauseBtn = document.getElementById('btn-pause-sim');
+      const stopBtn = document.getElementById('btn-stop-sim');
+      const countInput = document.getElementById('sim-count');
+
+      if (startBtn) {
+        startBtn.addEventListener('click', async () => {
+          const count = parseInt(countInput.value);
+          await this.startSimulation(count);
+        });
+      }
+
+      if (pauseBtn) {
+        pauseBtn.addEventListener('click', async () => {
+          await this.pauseSimulation();
+        });
+      }
+
+      if (stopBtn) {
+        stopBtn.addEventListener('click', async () => {
+          await this.stopSimulation();
+        });
+      }
+    }, 1000);
+  }
+
+  async startSimulation(count) {
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/simulator/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        this.showNotification(`Simulação iniciada com ${count} cargas!`, 'success');
+        this.updateSimulatorButtons(true);
+        await this.loadSimulatorStats();
+
+        // Refresh shipments and alerts
+        if (this.currentSection === 'shipments') {
+          await this.loadShipmentsData();
+        }
+
+        // Start auto-refresh
+        this.startSimulatorRefresh();
+      } else {
+        this.showNotification(data.error || 'Erro ao iniciar simulação', 'error');
+      }
+    } catch (error) {
+      console.error('Error starting simulation:', error);
+      this.showNotification('Erro ao iniciar simulação', 'error');
+    }
+  }
+
+  async pauseSimulation() {
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/simulator/pause`, {
+        method: 'PUT',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        this.showNotification('Simulação pausada', 'info');
+        this.stopSimulatorRefresh();
+      }
+    } catch (error) {
+      console.error('Error pausing simulation:', error);
+      this.showNotification('Erro ao pausar simulação', 'error');
+    }
+  }
+
+  async stopSimulation() {
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/simulator/stop`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        this.showNotification('Simulação parada', 'success');
+        this.updateSimulatorButtons(false);
+        this.stopSimulatorRefresh();
+        await this.loadSimulatorStats();
+      }
+    } catch (error) {
+      console.error('Error stopping simulation:', error);
+      this.showNotification('Erro ao parar simulação', 'error');
+    }
+  }
+
+  updateSimulatorButtons(running) {
+    const startBtn = document.getElementById('btn-start-sim');
+    const pauseBtn = document.getElementById('btn-pause-sim');
+    const stopBtn = document.getElementById('btn-stop-sim');
+
+    if (startBtn) {
+      startBtn.disabled = running;
+    }
+    if (pauseBtn) {
+      pauseBtn.disabled = !running;
+    }
+    if (stopBtn) {
+      stopBtn.disabled = !running;
+    }
+  }
+
+  startSimulatorRefresh() {
+    if (this.simulatorRefreshInterval) {
+      clearInterval(this.simulatorRefreshInterval);
+    }
+
+    this.simulatorRefreshInterval = setInterval(async () => {
+      await this.loadSimulatorStats();
+
+      // Refresh current section data
+      if (this.currentSection === 'shipments') {
+        await this.loadShipmentsData();
+      } else if (this.currentSection === 'alerts') {
+        await this.loadAlertsData();
+      } else if (this.currentSection === 'dashboard') {
+        await this.loadDashboardData();
+      }
+    }, 30000); // 30 seconds
+  }
+
+  stopSimulatorRefresh() {
+    if (this.simulatorRefreshInterval) {
+      clearInterval(this.simulatorRefreshInterval);
+      this.simulatorRefreshInterval = null;
+    }
+  }
+
+  async loadSimulatorData() {
+    await this.loadSimulatorStats();
+
+    // Initialize live alerts feed if module is available
+    if (this.liveAlerts) {
+      await this.liveAlerts.loadAlerts();
+    }
+  }
+
+  async loadSimulatorStats() {
+    try {
+      const response = await fetch(`${window.API_BASE_URL}/simulator/status`);
+      const data = await response.json();
+
+      if (data.success) {
+        this.displaySimulatorStats(data.data);
+      }
+    } catch (error) {
+      console.error('Error loading simulator stats:', error);
+    }
+  }
+
+  displaySimulatorStats(stats) {
+    const container = document.getElementById('simulator-stats');
+    const statusContainer = document.getElementById('simulator-status');
+
+    if (!container) {
+      return;
+    }
+
+    // Update status message
+    if (statusContainer) {
+      if (stats.is_running) {
+        statusContainer.innerHTML = `
+          <div class="status-message status-running">
+            🟢 Simulação Ativa - ${stats.active_shipments} cargas monitoradas
+          </div>
+        `;
+        this.updateSimulatorButtons(true);
+      } else {
+        statusContainer.innerHTML = `
+          <div class="status-message status-stopped">
+            ⚫ Simulação Parada - Inicie para começar
+          </div>
+        `;
+        this.updateSimulatorButtons(false);
+      }
+    }
+
+    // Display shipments stats
+    if (stats.shipments && stats.shipments.length > 0) {
+      const statusCounts = {
+        in_transit: 0,
+        completed: 0,
+        paused: 0,
+      };
+
+      stats.shipments.forEach(s => {
+        statusCounts[s.status] = (statusCounts[s.status] || 0) + 1;
+      });
+
+      const avgRisk =
+        stats.shipments.reduce((sum, s) => sum + (s.current_risk_score || 0), 0) /
+        stats.shipments.length;
+
+      container.innerHTML = `
+        <div class="stats-summary-grid">
+          <div class="stat-summary-item">
+            <div class="stat-summary-icon">
+              <i class="fas fa-truck"></i>
+            </div>
+            <div class="stat-summary-content">
+              <div class="stat-summary-value">${stats.active_shipments}</div>
+              <div class="stat-summary-label">Cargas Ativas</div>
+            </div>
+          </div>
+          <div class="stat-summary-item">
+            <div class="stat-summary-icon">
+              <i class="fas fa-road"></i>
+            </div>
+            <div class="stat-summary-content">
+              <div class="stat-summary-value">${statusCounts.in_transit}</div>
+              <div class="stat-summary-label">Em Trânsito</div>
+            </div>
+          </div>
+          <div class="stat-summary-item">
+            <div class="stat-summary-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-summary-content">
+              <div class="stat-summary-value">${statusCounts.completed}</div>
+              <div class="stat-summary-label">Completadas</div>
+            </div>
+          </div>
+          <div class="stat-summary-item">
+            <div class="stat-summary-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-summary-content">
+              <div class="stat-summary-value">${avgRisk.toFixed(0)}</div>
+              <div class="stat-summary-label">Risco Médio</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="shipments-table">
+          <table class="simulator-table">
+            <thead>
+              <tr>
+                <th>Carga</th>
+                <th>Status</th>
+                <th>Progresso</th>
+                <th>Risco</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stats.shipments
+                .slice(0, 10)
+                .map(
+                  s => `
+                  <tr>
+                    <td>${s.shipment_number}</td>
+                    <td><span class="badge-status ${s.status}">${s.status}</span></td>
+                    <td>
+                      <div class="mini-progress-bar">
+                        <div class="mini-progress-fill" style="width: ${s.progress_percent}%"></div>
+                        <span class="mini-progress-text">${s.progress_percent.toFixed(0)}%</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="risk-badge risk-${this.getRiskLevel(s.current_risk_score)}">
+                        ${s.current_risk_score.toFixed(0)}
+                      </span>
+                    </td>
+                  </tr>
+                `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } else {
+      container.innerHTML =
+        '<div class="empty-state">Nenhuma carga ativa. Inicie a simulação.</div>';
+    }
+  }
+
   // Utility methods
+
+  // =========================================================================
+  // ML RISK PREDICTION - NEW FEATURE
+  // =========================================================================
+
+  /**
+   * Check ML API status on initialization
+   */
+  async checkMLStatus() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/risk/status`);
+      const data = await response.json();
+
+      if (data.success) {
+        const mlAvailable = data.data.ml_realtime?.available || false;
+        const mlBadge = document.getElementById('ml-status-badge');
+        
+        if (mlBadge) {
+          if (mlAvailable) {
+            mlBadge.innerHTML = '<i class="fas fa-check-circle"></i> ML Ativo';
+            mlBadge.className = 'badge badge-success';
+            mlBadge.style.display = 'inline-block';
+          } else {
+            mlBadge.innerHTML = '<i class="fas fa-info-circle"></i> Apenas Cache';
+            mlBadge.className = 'badge badge-info';
+            mlBadge.style.display = 'inline-block';
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Erro ao verificar status ML:', error);
+    }
+  }
+
+  /**
+   * Setup Risk Checker event listeners
+   */
+  setupRiskChecker() {
+    const form = document.getElementById('risk-checker-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await this.checkRisk();
+    });
+
+    // Update badge when checkbox changes
+    const mlCheckbox = document.getElementById('use-ml-model');
+    if (mlCheckbox) {
+      mlCheckbox.addEventListener('change', (e) => {
+        const modeBadge = document.getElementById('ml-mode-badge');
+        if (e.target.checked) {
+          modeBadge.innerHTML = '<i class="fas fa-brain"></i> Modo: ML Tempo Real';
+          modeBadge.className = 'badge badge-ml active';
+        } else {
+          modeBadge.innerHTML = '<i class="fas fa-database"></i> Modo: Cache';
+          modeBadge.className = 'badge badge-ml';
+        }
+      });
+    }
+  }
+
+  /**
+   * Check risk for a specific segment
+   */
+  async checkRisk() {
+    const uf = document.getElementById('risk-uf').value;
+    const br = document.getElementById('risk-br').value;
+    const km = parseFloat(document.getElementById('risk-km').value);
+    const hour = document.getElementById('risk-hour').value;
+    const weather = document.getElementById('risk-weather').value;
+    const useML = document.getElementById('use-ml-model').checked;
+
+    const btn = document.getElementById('check-risk-btn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+
+    const startTime = Date.now();
+
+    try {
+      const requestBody = {
+        uf,
+        br,
+        km,
+        hour: hour ? parseInt(hour) : new Date().getHours(),
+        dayOfWeek: new Date().getDay(),
+        weatherCondition: weather || undefined,
+        useRealTimeML: useML
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/risk/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+      const elapsed = Date.now() - startTime;
+
+      if (data.success) {
+        this.displayRiskResult(data.data, elapsed);
+        this.showNotification('✅ Análise de risco concluída!', 'success');
+      } else {
+        this.showNotification('Erro ao consultar risco: ' + (data.error || 'Erro desconhecido'), 'error');
+      }
+    } catch (error) {
+      console.error('Erro ao consultar risco:', error);
+      this.showNotification('Erro de conexão com o servidor', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+
+  /**
+   * Display risk prediction results
+   */
+  displayRiskResult(data, elapsed) {
+    const resultDiv = document.getElementById('risk-result');
+    resultDiv.style.display = 'block';
+
+    // Animate score update
+    const scoreValue = document.getElementById('risk-score-value');
+    this.animateNumber(scoreValue, 0, data.risk_score, 800);
+
+    // Update circle color
+    const scoreCircle = document.getElementById('risk-score-circle');
+    scoreCircle.className = `score-circle risk-${data.risk_level}`;
+
+    // Update risk level badge
+    const badges = {
+      baixo: { icon: '✅', text: 'Risco Baixo', class: 'success' },
+      moderado: { icon: '⚡', text: 'Risco Moderado', class: 'warning' },
+      alto: { icon: '⚠️', text: 'Risco Alto', class: 'danger' },
+      critico: { icon: '🚨', text: 'Risco Crítico', class: 'critical' }
+    };
+
+    const badge = badges[data.risk_level] || badges.moderado;
+    const badgeEl = document.getElementById('risk-level-badge');
+    badgeEl.className = `risk-level-badge badge-${badge.class}`;
+    badgeEl.innerHTML = `${badge.icon} ${badge.text}`;
+
+    // Update meta information
+    const sourceIcon = data.prediction_source === 'ml_realtime' ? 
+      '<i class="fas fa-brain"></i>' : 
+      '<i class="fas fa-database"></i>';
+    const sourceText = data.prediction_source === 'ml_realtime' ? 
+      'Modelo ML' : 
+      'Cache Pré-calculado';
+    
+    document.getElementById('prediction-source').innerHTML = 
+      `${sourceIcon} ${sourceText}`;
+    document.getElementById('prediction-time').innerHTML = 
+      `<i class="fas fa-clock"></i> ${elapsed}ms`;
+    document.getElementById('segment-key').innerHTML = 
+      `<i class="fas fa-map-marker-alt"></i> ${data.segment_key || 'N/A'}`;
+
+    // Update recommendations
+    const recsEl = document.getElementById('risk-recommendations');
+    if (data.recommendations && data.recommendations.length > 0) {
+      recsEl.innerHTML = `
+        <h4><i class="fas fa-lightbulb"></i> Recomendações:</h4>
+        <ul>
+          ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+      `;
+    } else {
+      recsEl.innerHTML = '<p>Sem recomendações específicas.</p>';
+    }
+
+    // Update ML probabilities (if available)
+    const probDiv = document.getElementById('ml-probabilities');
+    if (data.class_probabilities) {
+      probDiv.style.display = 'block';
+      
+      const probs = data.class_probabilities;
+      this.updateProbabilityBar('sem-vitimas', probs.sem_vitimas);
+      this.updateProbabilityBar('com-feridos', probs.com_feridos);
+      this.updateProbabilityBar('com-mortos', probs.com_mortos);
+    } else {
+      probDiv.style.display = 'none';
+    }
+
+    // Smooth scroll to result
+    setTimeout(() => {
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
+
+  /**
+   * Update probability bar animation
+   */
+  updateProbabilityBar(type, value) {
+    const fill = document.getElementById(`prob-${type}`);
+    const val = document.getElementById(`prob-${type}-val`);
+    
+    if (fill && val) {
+      setTimeout(() => {
+        fill.style.width = `${value}%`;
+      }, 50);
+      val.textContent = `${value.toFixed(1)}%`;
+    }
+  }
+
+  /**
+   * Animate number from start to end
+   */
+  animateNumber(element, start, end, duration) {
+    const range = end - start;
+    const increment = range / (duration / 16); // 60fps
+    let current = start;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+        current = end;
+        clearInterval(timer);
+      }
+      element.textContent = current.toFixed(1);
+    }, 16);
+  }
 }
 
 // Notification styles

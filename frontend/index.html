@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Sompo Seguros - Sistema de Monitoramento Inteligente</title>
 
     <!-- Meta tags para SEO -->
@@ -41,6 +44,7 @@
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="modern-styles.css?v=2" />
+    <link rel="stylesheet" href="alerts-styles.css?v=1" />
   </head>
   <body>
     <!-- Loading Screen -->
@@ -253,10 +257,17 @@
               </button>
             </div>
           </div>
+          <div class="nav-item">
+            <a href="#" class="nav-link" data-section="simulator">
+              <i class="fas fa-flask"></i>
+              <span>Simulador</span>
+            </a>
+          </div>
           <div class="nav-item has-dropdown">
             <a href="#" class="nav-link" data-section="alerts">
               <i class="fas fa-exclamation-triangle"></i>
               <span>Alertas</span>
+              <span id="alert-badge-count" class="alert-badge"></span>
               <i class="fas fa-chevron-down nav-caret"></i>
             </a>
             <div class="nav-dropdown">
@@ -319,12 +330,12 @@
                 <i class="fas fa-truck"></i>
               </div>
               <div class="stat-content">
-                <h3 class="stat-number">12,450</h3>
+                <h3 class="stat-number">-</h3>
                 <p class="stat-label">Cargas Ativas</p>
               </div>
-              <div class="stat-trend positive">
-                <i class="fas fa-arrow-up"></i>
-                <span>+12%</span>
+              <div class="stat-trend">
+                <i class="fas fa-minus"></i>
+                <span>--</span>
               </div>
             </div>
 
@@ -333,12 +344,12 @@
                 <i class="fas fa-exclamation-triangle"></i>
               </div>
               <div class="stat-content">
-                <h3 class="stat-number">58</h3>
+                <h3 class="stat-number">-</h3>
                 <p class="stat-label">Alertas Críticos</p>
               </div>
-              <div class="stat-trend negative">
-                <i class="fas fa-arrow-down"></i>
-                <span>-5%</span>
+              <div class="stat-trend">
+                <i class="fas fa-minus"></i>
+                <span>--</span>
               </div>
             </div>
 
@@ -347,12 +358,12 @@
                 <i class="fas fa-route"></i>
               </div>
               <div class="stat-content">
-                <h3 class="stat-number">1,250,000</h3>
+                <h3 class="stat-number">-</h3>
                 <p class="stat-label">Km Monitorados</p>
               </div>
-              <div class="stat-trend positive">
-                <i class="fas fa-arrow-up"></i>
-                <span>+8%</span>
+              <div class="stat-trend">
+                <i class="fas fa-minus"></i>
+                <span>--</span>
               </div>
             </div>
 
@@ -361,12 +372,162 @@
                 <i class="fas fa-shield-alt"></i>
               </div>
               <div class="stat-content">
-                <h3 class="stat-number">99.7%</h3>
+                <h3 class="stat-number">-</h3>
                 <p class="stat-label">Taxa de Segurança</p>
               </div>
-              <div class="stat-trend positive">
-                <i class="fas fa-arrow-up"></i>
-                <span>+0.2%</span>
+              <div class="stat-trend">
+                <i class="fas fa-minus"></i>
+                <span>--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk Checker Widget - ML Prediction -->
+          <div class="card modern-card" id="risk-checker-widget">
+            <div class="card-header">
+              <h3>
+                <i class="fas fa-calculator"></i>
+                Consultar Risco de Trecho
+              </h3>
+              <div class="header-actions">
+                <span class="badge badge-ml" id="ml-mode-badge">
+                  <i class="fas fa-database"></i> Modo: Cache
+                </span>
+                <span class="badge badge-info" id="ml-status-badge" style="display: none;">
+                  <i class="fas fa-circle"></i> Carregando...
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <form id="risk-checker-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="risk-uf">Estado (UF)</label>
+                    <select id="risk-uf" required>
+                      <option value="">Selecione...</option>
+                      <option value="SP">SP - São Paulo</option>
+                      <option value="RJ">RJ - Rio de Janeiro</option>
+                      <option value="MG">MG - Minas Gerais</option>
+                      <option value="PR">PR - Paraná</option>
+                      <option value="SC">SC - Santa Catarina</option>
+                      <option value="RS">RS - Rio Grande do Sul</option>
+                      <option value="BA">BA - Bahia</option>
+                      <option value="PE">PE - Pernambuco</option>
+                      <option value="CE">CE - Ceará</option>
+                      <option value="PA">PA - Pará</option>
+                      <option value="GO">GO - Goiás</option>
+                      <option value="ES">ES - Espírito Santo</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="risk-br">Rodovia (BR)</label>
+                    <input type="number" id="risk-br" placeholder="Ex: 116" required min="1" max="999">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="risk-km">Quilômetro</label>
+                    <input type="number" id="risk-km" placeholder="Ex: 523.5" required min="0" step="0.1">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="risk-hour">Hora do Dia (opcional)</label>
+                    <input type="number" id="risk-hour" placeholder="0-23" min="0" max="23">
+                    <small>Deixe vazio para usar hora atual</small>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="risk-weather">Condição Climática (opcional)</label>
+                    <select id="risk-weather">
+                      <option value="">Padrão</option>
+                      <option value="claro">☀️ Céu Claro</option>
+                      <option value="nublado">☁️ Nublado</option>
+                      <option value="chuva">🌧️ Chuva</option>
+                      <option value="neblina">🌫️ Neblina</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="display: flex; flex-direction: column; justify-content: flex-end;">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="use-ml-model">
+                      <span class="checkbox-custom"></span>
+                      <span>Usar Modelo ML (mais preciso)</span>
+                    </label>
+                    <small style="color: var(--text-secondary); margin-top: 4px; margin-left: 24px;">
+                      Predição em tempo real via LightGBM
+                    </small>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="check-risk-btn">
+                  <i class="fas fa-search"></i>
+                  Consultar Risco
+                </button>
+              </form>
+
+              <!-- Results -->
+              <div id="risk-result" class="risk-result" style="display: none;">
+                <div class="risk-score-display">
+                  <div class="score-circle" id="risk-score-circle">
+                    <div class="score-value" id="risk-score-value">0</div>
+                    <div class="score-label">Score de Risco</div>
+                  </div>
+                  
+                  <div class="risk-details">
+                    <div class="risk-level-badge" id="risk-level-badge">
+                      <!-- Badge dinâmico -->
+                    </div>
+                    
+                    <div class="risk-meta">
+                      <span id="prediction-source">
+                        <i class="fas fa-database"></i> Cache
+                      </span>
+                      <span id="prediction-time">
+                        <i class="fas fa-clock"></i> --ms
+                      </span>
+                      <span id="segment-key">
+                        <i class="fas fa-map-marker-alt"></i> --
+                      </span>
+                    </div>
+
+                    <div class="recommendations" id="risk-recommendations">
+                      <!-- Lista de recomendações -->
+                    </div>
+
+                    <!-- Probabilidades ML (só aparece se usar ML) -->
+                    <div id="ml-probabilities" class="ml-probabilities" style="display: none;">
+                      <h4>
+                        <i class="fas fa-chart-pie"></i>
+                        Probabilidades do Modelo ML
+                      </h4>
+                      <div class="probability-bars">
+                        <div class="prob-item">
+                          <span class="prob-label">Sem vítimas:</span>
+                          <div class="prob-bar">
+                            <div class="prob-fill prob-low" id="prob-sem-vitimas" style="width: 0%"></div>
+                          </div>
+                          <span class="prob-value" id="prob-sem-vitimas-val">0%</span>
+                        </div>
+                        <div class="prob-item">
+                          <span class="prob-label">Com feridos:</span>
+                          <div class="prob-bar">
+                            <div class="prob-fill prob-med" id="prob-com-feridos" style="width: 0%"></div>
+                          </div>
+                          <span class="prob-value" id="prob-com-feridos-val">0%</span>
+                        </div>
+                        <div class="prob-item">
+                          <span class="prob-label">Com mortos:</span>
+                          <div class="prob-bar">
+                            <div class="prob-fill prob-high" id="prob-com-mortos" style="width: 0%"></div>
+                          </div>
+                          <span class="prob-value" id="prob-com-mortos-val">0%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -455,6 +616,61 @@
           </div>
         </section>
 
+        <!-- Simulator Section -->
+        <section id="simulator-section" class="content-section">
+          <div class="section-header">
+            <h1>Simulador de Cargas</h1>
+            <p>Controle e monitoramento do simulador de cargas em trânsito</p>
+          </div>
+
+          <!-- Simulator Controls -->
+          <div class="chart-card glass-card">
+            <div class="chart-header">
+              <h3>Controles do Simulador</h3>
+            </div>
+            <div class="chart-content">
+              <div class="simulator-controls">
+                <div class="control-group">
+                  <label for="sim-count">Número de Cargas:</label>
+                  <input type="number" id="sim-count" min="1" max="50" value="10" />
+                </div>
+                <div class="control-buttons">
+                  <button class="btn btn-primary" id="btn-start-sim">
+                    <i class="fas fa-play"></i> Iniciar Simulação
+                  </button>
+                  <button class="btn btn-secondary" id="btn-pause-sim" disabled>
+                    <i class="fas fa-pause"></i> Pausar
+                  </button>
+                  <button class="btn btn-danger" id="btn-stop-sim" disabled>
+                    <i class="fas fa-stop"></i> Parar
+                  </button>
+                </div>
+                <div id="simulator-status" class="simulator-status"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulator Stats -->
+          <div class="chart-card glass-card" style="margin-top: 1rem">
+            <div class="chart-header">
+              <h3>Status da Simulação</h3>
+            </div>
+            <div class="chart-content">
+              <div id="simulator-stats" class="simulator-stats"></div>
+            </div>
+          </div>
+
+          <!-- Live Alerts Feed -->
+          <div class="chart-card glass-card" style="margin-top: 1rem">
+            <div class="chart-header">
+              <h3>Feed de Alertas Ao Vivo</h3>
+            </div>
+            <div class="chart-content">
+              <div id="live-alerts-feed" class="data-list"></div>
+            </div>
+          </div>
+        </section>
+
         <!-- Alerts Section -->
         <section id="alerts-section" class="content-section">
           <div class="section-header">
@@ -463,7 +679,16 @@
           </div>
           <div class="chart-card glass-card">
             <div class="chart-header">
-              <h3>Alertas Recentes</h3>
+              <h3>Alertas Ativos</h3>
+              <div class="chart-actions">
+                <button
+                  class="btn-icon"
+                  onclick="window.sompoApp.loadAlertsData()"
+                  title="Atualizar"
+                >
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
             </div>
             <div class="chart-content">
               <div id="alerts-list" class="data-list"></div>
@@ -491,7 +716,12 @@
     </div>
 
     <!-- Scripts -->
-    <script src="config.js?v=2"></script>
+    <script>
+      // Configuração inline para evitar cache
+      window.API_BASE_URL = 'http://localhost:3001/api/v1';
+      console.log('✅ API_BASE_URL configurado:', window.API_BASE_URL);
+    </script>
+    <script src="config.js?v=3"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Leaflet JS (Map) -->
@@ -502,6 +732,8 @@
     ></script>
     <!-- Leaflet.heat plugin for heatmap layer -->
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <script src="modern-app.js?v=2"></script>
+    <script src="historical-data.js?v=1"></script>
+    <script src="live-alerts.js?v=1"></script>
+    <script src="modern-app.js?v=6"></script>
   </body>
 </html>

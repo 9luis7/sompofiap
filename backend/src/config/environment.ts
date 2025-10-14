@@ -11,13 +11,20 @@ export const environment = {
 
   // Banco de Dados
   database: {
+    // Use SQLite por padrão para facilitar setup
+    dialect: (process.env.DB_DIALECT || 'sqlite') as 'sqlite' | 'postgres',
+    
+    // PostgreSQL settings (usado se DB_DIALECT=postgres)
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     name: process.env.DB_NAME || 'sompo_monitoring',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
     ssl: process.env.DB_SSL === 'true',
-    dialect: 'postgres' as const,
+    
+    // SQLite settings (usado por padrão)
+    storage: process.env.DB_STORAGE || './database/sompo.db',
+    
     pool: {
       max: 5,
       min: 0,

@@ -1,0 +1,21 @@
+# Dependências para Treinamento do Modelo de Risco
+# Sistema Sompo - Machine Learning
+
+# Análise de dados
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0  # Para ler arquivos Excel
+
+# Machine Learning
+lightgbm>=4.0.0
+scikit-learn>=1.3.0
+joblib>=1.3.0  # Para salvar/carregar modelos
+
+# API de Predição
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Opcional (para visualizações)
+# matplotlib>=3.7.0
+# seaborn>=0.12.0
+

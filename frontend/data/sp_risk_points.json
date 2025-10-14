@@ -1,11 +1,8 @@
 {
-  "source": "Ituran Mapa de Risco",
-  "attribution": "Mapeamento de risco urbano SP",
-  "points": [
-    { "lat": -23.5614, "lng": -46.6554, "intensity": 0.7 },
-    { "lat": -23.5716, "lng": -46.6916, "intensity": 0.8 },
-    { "lat": -23.5160, "lng": -46.6240, "intensity": 0.6 },
-    { "lat": -23.6000, "lng": -46.6400, "intensity": 0.5 },
-    { "lat": -23.5400, "lng": -46.7000, "intensity": 0.65 }
-  ]
+  "_comment": "ARQUIVO DESCONTINUADO - Não usar diretamente",
+  "_note": "Os dados de risco agora vêm do backend via API /api/accidents/heatmap",
+  "_info": "Este arquivo é mantido apenas como fallback estático para desenvolvimento",
+  "source": "Backend API - Historical Accidents Data (DATATRAN)",
+  "attribution": "Dados reais de acidentes do sistema DATATRAN",
+  "points": []
 }

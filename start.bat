@@ -1,106 +1,76 @@
 @echo off
 chcp 65001 >nul
-title Sompo Monitoring System - Setup
+title Sompo Monitoring System
 
 echo.
-echo ========================================
-echo   🚀 SOMPO MONITORING SYSTEM
-echo ========================================
-echo.
-echo Iniciando configuração automática...
+echo ═══════════════════════════════════════════════════════
+echo    🚀 SISTEMA SOMPO - Iniciando...
+echo ═══════════════════════════════════════════════════════
 echo.
 
-:: Verificar se Node.js está instalado
-echo [1/5] Verificando Node.js...
+:: Verificar Node.js
+echo [1/4] Verificando Node.js...
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo ❌ Node.js não encontrado!
-    echo Por favor, instale o Node.js em: https://nodejs.org/
-    echo.
+    echo    Instale em: https://nodejs.org/
     pause
     exit /b 1
 )
-echo ✅ Node.js encontrado: 
 node --version
 
-:: Verificar se Python está instalado
+:: Instalar dependências root (se necessário)
 echo.
-echo [2/5] Verificando Python...
-python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo ❌ Python não encontrado!
-    echo Por favor, instale o Python em: https://python.org/
-    echo.
-    pause
-    exit /b 1
-)
-echo ✅ Python encontrado:
-python --version
-
-:: Instalar dependências Node.js
-echo.
-echo [3/5] Instalando dependências Node.js...
+echo [2/4] Verificando dependências root...
 if not exist "node_modules" (
-    echo 📦 Instalando dependências...
+    echo 📦 Instalando...
     npm install
-    if %errorlevel% neq 0 (
-        echo ❌ Erro ao instalar dependências Node.js
-        pause
-        exit /b 1
-    )
-    echo ✅ Dependências Node.js instaladas
+)
+
+:: Instalar dependências backend
+echo.
+echo [3/4] Verificando dependências backend...
+cd backend
+if not exist "node_modules" (
+    echo 📦 Instalando...
+    npm install
+)
+
+:: Build backend
+echo.
+echo [4/4] Compilando backend...
+if not exist "dist" (
+    npm run build
 ) else (
-    echo ✅ Dependências Node.js já instaladas
+    echo ✅ Backend já compilado
 )
 
-:: Instalar dependências Python
-echo.
-echo [4/5] Instalando dependências Python...
-echo 📦 Instalando ferramentas de qualidade Python...
-python -m pip install flake8 black isort
-if %errorlevel% neq 0 (
-    echo ❌ Erro ao instalar dependências Python
-    pause
-    exit /b 1
-)
-echo ✅ Dependências Python instaladas
-
-:: Verificar qualidade do código
-echo.
-echo [5/5] Verificando qualidade do código...
-echo 🔍 Executando linters...
-npm run quality
-if %errorlevel% neq 0 (
-    echo ⚠️  Alguns problemas de qualidade encontrados
-    echo Executando correções automáticas...
-    npm run lint
-    npm run format
-) else (
-    echo ✅ Código verificado com sucesso
-)
+:: Voltar para raiz
+cd ..
 
 echo.
-echo ========================================
-echo   🎉 CONFIGURAÇÃO CONCLUÍDA!
-echo ========================================
+echo ═══════════════════════════════════════════════════════
+echo    ✅ INICIANDO SISTEMA
+echo ═══════════════════════════════════════════════════════
 echo.
-echo Iniciando sistema em terminais separados...
+echo 🔧 Backend:  http://localhost:3001
+echo 🌐 Frontend: http://localhost:8080
+echo.
+echo 👤 Login: admin.sompo / password123
 echo.
 
-:: Abrir terminal para o backend
-start "Sompo Backend" cmd /k "cd /d %~dp0 && title Sompo Backend && echo 🚀 Iniciando Backend... && npm run backend"
+:: Iniciar backend em terminal separado
+start "Sompo Backend API" cmd /k "cd /d %~dp0backend && echo 🚀 Backend API rodando... && node dist/server.js"
 
-:: Aguardar um pouco para o backend inicializar
-timeout /t 3 /nobreak >nul
+:: Aguardar backend inicializar
+timeout /t 5 /nobreak >nul
 
-:: Abrir terminal para o frontend
-start "Sompo Frontend" cmd /k "cd /d %~dp0 && title Sompo Frontend && echo 🌐 Iniciando Frontend... && timeout /t 2 /nobreak >nul && npm run frontend"
+:: Iniciar frontend (com cache desabilitado para desenvolvimento)
+start "Sompo Frontend" cmd /k "cd /d %~dp0 && echo 🌐 Frontend servido em http://localhost:8080 && npx http-server frontend -p 8080 -c-1 -o"
 
 echo.
-echo ✅ Sistema iniciado com sucesso!
+echo ✅ Sistema iniciado!
 echo.
-echo 📱 Frontend: http://localhost:3000
-echo 🔧 Backend: http://localhost:5000
+echo 📖 Documentação: README.md
 echo.
-echo Pressione qualquer tecla para fechar este terminal...
-pause >nul
+pause
